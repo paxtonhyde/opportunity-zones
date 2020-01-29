@@ -1,0 +1,4 @@
+## generated files ##
+__pycache__
+.ipynb_checkpoints/
+spark-warehouse/
