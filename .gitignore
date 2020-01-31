@@ -1,4 +1,11 @@
 ## generated files ##
+.DS_Store
 __pycache__
 .ipynb_checkpoints/
 spark-warehouse/
+
+## don't load github with data ##
+data/
+
+## specific files ##
+proposal.md
