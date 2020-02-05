@@ -23,3 +23,12 @@ query_labels = {'population':['total'],
                 'home_value':['median'],
                 'structure_year':['median'],
                 'structure_units':['total', 'one_a', 'one_d', 'mobile']}
+
+us_ = {'household_income_median':63179, 
+        'age_median': 38.2,
+        'p_poverty': 0.118,
+        'p_black': 0.127,
+        'p_white' : 0.730,
+        'home_value_median':217600,
+        'p_vacancy': 0.0315}
+

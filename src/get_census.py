@@ -48,6 +48,8 @@ class census_fetcher():
 
         ## !!! Need to catch errors thrown by census.get()
         response = self.c.dataset.get(fields, {'for' : f'tract:{tract}', 'in' : f'state:{state} county:{county}'})
+
+        ## Here: should also replace any negative values (like -666666666.0) with -1
         if len(response) == 0:
             print(f"Empty response for geoid {geoid}.")
             return (-1 for f in fields)
