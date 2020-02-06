@@ -23,30 +23,6 @@ def centroid_plot(ax, features, centroid, kwargs={}):
     ax.barh(y, centroid, tick_label=features, **kwargs)
     ax.set_xlim(np.min(centroid) - 0.3, np.max(centroid) + 0.7)
 
-def nmf_cluster_plots(fitted_NMF, features, sns_palette='deep'):
-    '''Not tested for n_components > 8
-        *Look at figsize, 
-    '''
-    n_comp, h = fitted_NMF.n_components, fitted_NMF.components_
-    if n_comp > 4:
-        figshape = (2, n_comp // 2+(n_comp%2))
-    else:
-        figshape = (1, n_comp)
-
-    fig, axes = plt.subplots(figshape[0], figshape[1], figsize=(20,10))
-    palette = sns.color_palette(palette=sns_palette)
-
-    i = 0
-    for ax, c in zip(axes.flatten(), h):
-        centroid_plot(ax, features, c, kwargs={'color':palette.as_hex()[i], 'alpha':0.9})
-        ax.set_title("Cluster {}".format(i), fontsize=16)
-        if i%figshape[1] != 0:
-            ax.set_yticklabels([])
-            ax.set_yticks([])
-        i+=1
-        
-    fig.tight_layout()
-
 def cluster_plots(clusters, features, sns_palette='deep'):
     '''Not tested for n_components > 8
         *Look at figsize, 

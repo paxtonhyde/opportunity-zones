@@ -14,14 +14,14 @@ class Clusterer():
     '''
     '''
 
-    def __init__(self, algorithm, drop, **kwargs):
+    def __init__(self, estimator, drop, **kwargs):
         self.drop = drop
         self.dbscan = False
 
         if kwargs:
-            self.estimator = self._pick_estimator(algorithm, kwargs)
+            self.estimator = self._pick_estimator(estimator, kwargs)
         else:
-            self.estimator = self._pick_estimator(algorithm)
+            self.estimator = self._pick_estimator(estimator)
         self.attributes = self.estimator.__dict__
         print("Using: {}".format(self.estimator))
 

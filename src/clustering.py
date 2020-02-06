@@ -59,6 +59,12 @@ if __name__ == "__main__":
     tract_ = dataframe['tract'].copy()
     states_ = dataframe['state'].copy()
 
+    ## reorder columns
+    order = ['Non-LIC', 'household_income_median', 'outofcountyflux', 'p_white', 'p_multiple_unit_strucs',\
+        'home_value_median', 'structure_year_median', 'p_never_married', 'p_renting', 'vacancy',\
+            'population_total', 'p_black', 'age_median', 'poverty', 'p_mobilehomes', 'state', 'tract']
+    dataframe = dataframe[order]
+
     ## drop non-features (Eventually integrate this feature into Clusterer class)
     drop = 'state tract'
     for c in drop.split():
@@ -67,6 +73,11 @@ if __name__ == "__main__":
         except KeyError:
             print("Couldn't drop column '{}' from features matrix.".format(c))
 
+    ## exclude LICs
+    exclude_LIC = False
+    if exclude_LIC:
+        dataframe = dataframe[dataframe['Non-LIC'] == 1]
+
     ## standardize data
     standardize = StandardScaler()
     X, features = dataframe.values,\
@@ -74,8 +85,10 @@ if __name__ == "__main__":
     X = standardize.fit_transform(X)
 
     algorithms = ['MeanShift', 'KMeans', 'DBSCAN']
-    ## {eps:0.85, min_samples:5}
+    ## {eps:0.85, min_samples:5} = ~8
+    ## w/o LIC {eps:2, min_samples:3} = 3
     n = 0
+    k = 3
     ## build model
     pax = Clusterer(algorithms[n], drop, n_jobs=-1)
     centers = pax.fit(X)
@@ -96,11 +109,10 @@ if __name__ == "__main__":
 
     cluster_plots(centers, features)
     plt.tight_layout()
-    plt.savefig(f"{images_directory}/{algorithms[n]}_def.png", dpi=120)
+    plt.savefig(f"{images_directory}/{algorithms[n]}_{'def'}.png", dpi=120)
     plt.show()
 
     ## calculate majority state by cluster
-    from collections import defaultdict
 
     pax_labels = pax.attributes['labels_']
     dataframe['cluster'] = pax_labels
@@ -110,5 +122,10 @@ if __name__ == "__main__":
     states = majority_states(pax_labels, dataframe)
     for k, v in states.items():
         print("Cluster {} states -> {}".format(k, v))
+
+    cluster2 = dataframe[dataframe['cluster'] == 2]
+    cluster2.to_pickle(f"{data_directory}/MScluster2.pkl")
+
+    
 
     

@@ -24,23 +24,23 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     # parser.add_argument('-f', '--file', type=str,\
     #                     help='.pkl file with empty values.')
-    parser.add_argument('-npr', '--NoPuertoRico', action='store_false',\
+    parser.add_argument('-npr', '--NoPuertoRico', action='store_true',\
                         help='Exclude Puerto Rican tracts.')
     args = vars(parser.parse_args())
     exclude_PR = args['NoPuertoRico']
 
     ## start the work
     features = pd.read_pickle("{}/qozs_features.pkl".format(data_directory))
-    states = [n[:2] for n in features['tract'].values]
 
     if exclude_PR:
-        PR_print, PR_file_extension = 'Ex', '_plusPR'
-        PR_idx = np.argwhere(np.array(states) == '72').reshape(-1)
-        feature = features.drop(PR_idx)
+        PR_print, PR_file_extension = 'Ex', '_exPR'
+        features = features[features['state'] != '72']
         features.reset_index(inplace=True, drop=True)
     else:
         PR_print, PR_file_extension = 'In', ''
     print("{}cluding Puerto Rico tracts.".format(PR_print))
+
+    states = [n[:2] for n in features['tract'].values]
 
     incomplete = features.drop(columns=['state','tract'])
     filled_matrix = KNN(k=3).fit_transform(incomplete.values)
