@@ -2,7 +2,7 @@ import argparse
 import pandas as pd 
 import numpy as np 
 from sklearn.cluster import KMeans, MeanShift, DBSCAN
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, MaxAbsScaler
 from geography import fips_to_state
 
 import os
@@ -16,6 +16,8 @@ class Clusterer():
 
     def __init__(self, algorithm, drop, **kwargs):
         self.drop = drop
+        self.dbscan = False
+
         if kwargs:
             self.estimator = self._pick_estimator(algorithm, kwargs)
         else:
@@ -32,26 +34,22 @@ class Clusterer():
             return KMeans(**kwargs)
             ## defaults : 
         elif a == 'dbscan':
+            self.dbscan = True
             return DBSCAN(**kwargs)
             ## defaults : 
         else:
             return MeanShift(**kwargs)
             ## defaults :
 
-    def standardize(self, X, fit=True):
-        ''' Around zero, unit variance.
-        '''
-        pass
-
-    def unstandardize(self, standard_X):
-        ''' Inverse transform to original dimensions.
-        '''
-        pass
-    
     def fit(self, X, kwargs={}):
+        ''' .fit() will not standardize X
+        '''
         self.estimator.fit(X, **kwargs)
         self.attributes = self.estimator.__dict__
-        return self.attributes['cluster_centers_']
+        if self.dbscan:
+            return self.attributes['core_sample_indices_']
+        else:
+            return self.attributes['cluster_centers_']
     
     ## for the future
     def score(self):

@@ -1,3 +1,5 @@
+## to do: generalize for any file command line argument
+
 ## fancyimpute requires TensorFlow
 import pandas as pd
 import numpy as np
@@ -8,6 +10,14 @@ import os
 this_directory = os.path.realpath(".")
 home_directory = os.path.split(this_directory)[0]
 data_directory = os.path.join(home_directory, "data")
+
+def add_LIC_col(dataframe):
+    '''
+    Add LIC/Non-LIC feature to dataframe of shape (tracts, features) with a census tract number column.
+    '''
+    LIC_column = pd.read_pickle("{}/qozs_1.pkl".format(data_directory))[['census_tract_number', 'Non-LIC']]
+    LIC_column = LIC_column.rename(columns={'census_tract_number':'tract'})
+    return dataframe.merge(LIC_column, how='left', on='tract')
 
 if __name__ == "__main__":
     ## argument parsing
@@ -40,9 +50,7 @@ if __name__ == "__main__":
     filled['tract'] = features['tract']
     filled['state'] = states
 
-    LIC = pd.read_pickle("{}/qozs_1.pkl".format(data_directory))[['census_tract_number', 'Non-LIC']]
-    LIC = LIC.rename(columns={'census_tract_number':'tract'})
-    filled = filled.merge(LIC, how='left', on='tract')
+    filled = add_LIC_col(filled)
 
     file_out = "qoz_model{}.pkl".format(PR_file_extension)
     filled.to_pickle("{}/{}".format(data_directory, file_out))
