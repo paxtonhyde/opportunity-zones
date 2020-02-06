@@ -7,90 +7,95 @@ Paxton Hyde
 Galvanize Data Science Immersive Capstone 2, February 2020
 
 ## Content
-- [Context](#context)
-- [Results](#results)
+- [Background](#background)
+- [Data](#data)
+- [Topic modeling with NMF](#NMF)
+- [Hard clustering](#Clustering)
 - [Takeaways](#takeaways)
-- [Spark](#spark-efficiency)
 - [References](#references)
+
 ## Background
 
-The chief Executive of each state can nominate tracts as QOZs in their state. A tract will be eligible if it meets the requirements of a "low-income community" or if it is both: (a) adjacent to an LIC and (b) has a median household income of less than 1.25 times the income of the adjacent LIC. 
+The Tax Cuts and Jobs Act of 2017 introduced an Opportunity Zone (OZ) program that allows capital gains tax deferrals and other benefits for investments in designated census tracts. The purpose of the program is to encourage investment in struggling communities. The idea is that the tax benefits will offset extra costs and risks associated with developing in neglected areas with smaller markets. News reporting critiques the program over its liberal designation process, which risks make the tax benefits a giveaway to wealthy investors who would have developed in any case.<sup>[1](#footnote1)</sup> For example, the Economist notes that a tract in downtown Portland, ME that hosts 200 tourists annually was designated as an Opportunity Zone.<sup>[2](#footnote2)</sup>
 
-Up to one-quarter of the LIC census tracts in a state may be designated as QOZs, or up to 25 QOZs if the state has less than 100 LIC tracts. Up to five percent of tracts in a state may be designated as non-LIC or LIC-adjacent tracts (with fractional portions rounded up). A QOZ designation may be based on either 2011-2015 5-year ACS data or a more recent 5-year survey with appropriate justification.
+Furthermore, research does not suggest that place-based tax incentive programs are particularly effective. It seems that any new jobs created simply replace old jobs that already existed or are taken by high-skilled workers who move in from elsewhere.<sup>[3](#footnote3)</sup>
 
-(TODO: flow chart for how a tract can be designated)
+President Trump has recently claimed victory for the program even though it is under investigation by the Treasury Department.<sup>[4,](#footnote4)</sup><sup>[5](#footnote5)</sup> Congress also has not introduced regulation requiring data collection and reports on the effects of the program.<sup>[6](#footnote6)</sup>
 
-The Tax Cuts and Jobs Act of 2017 included a new Opportunity Zone program, which provides capital gains tax deferrals and other benefits for investments in designated census tracts. The purpose of this program is to 
-Any census tract that is 
- is eligible to that meets the definition low-income community or that are adjacent to low-income communities may be designated as Opportunity Zones. There have been rumors however, that the designation process was corrupted and that the program has become a boon for luxury projects with wealthy investors. (See New York Times:  "Trump Tax Break That Benefited the Rich Is Being Investigated", and "How a Trump Tax Break to Help Poor Communities Became a Windfall for the Rich".)
+#### Opportunity Zone Designation Process
+todo: flow chart
 
-Even if only low-income and certain low-income-adjacent tracts can be designated as Opportunity Zones, the fact that there is evidence that the tax breaks are benefitting luxury projects is an indication that the designation process is probably too casual. I would guess that a good portion of the apparently mis-designated tracts are either sparsely populated or gentrifying. Although I don't know exactly what demographic statistics identify this type of tract, my assumption is that an unsupervised learning algorithm could tell the difference between an actual low-income community and these outlier tracts.
+State Governors nominate Census Tracts in their state as OZs, and the Secretary of the Treasury approves these selections. A tract is eligible if:
+ 
+- it meets the requirements of a *low-income community* (LIC), meaning that it has a 20% poverty rate and has a median family income is no more than 80% of the revelant surrounding area;<sup>[7](#footnote7)</sup> or  
+ 
+- it is adjacent to an LIC and has a median household income of no more than 125% of that tract. 
+
+Governors may nominate up to one-quarter of the LIC tracts in their state, or up to 25 if their state has less than 100 LICs. In addition, they may nominate a number of LIC-adjacent tracts up to five percent of the total tracts in the state. Designations may be based on data from the 2011-2015 or more recent American Community Survey (ACS) 5-year estimate.<sup>[8](#footnote8)</sup>
+
+#### Method
+
+Based on the reporting of the misdesignation of OZs providing tax benefits to certain tracts which are already gentrifying or seem undeserving for other reasons, the goals of this project are to:
+
+1. use topic modeling / soft clustering to identify archetypes or categories of the OZ tracts that seem *suspect* and undeserving of tax relief, and
+
+2. use hard clustering to find tracts that represent the categories that we think should not be receiving tax relief. We will be able to say that these tracts were misdesignated.
+
+## Data
+
+#### Feature Selection
+
+I gathered data for OZ tracts from the 2011-2015 ACS 5-year estimates using the Census Data API and the `census` module from PyPi. I picked features using a "shotgun" method, keeping in mind that I need them to differentiate *suspect* from legitimate OZs. 
+
+Gentrifying areas generally have:
+- an influx of people
+- significant racial mixture
+- a young population 
+- a high percentage of renters and multi-unit housing
+- recent development, and 
+- increasing home values.
+
+| +   | - |
+|-------|--------|
+| % residents moving in from another county |      median age of residents|
+| % white population  |     % black population |
+| median household income and home value  |      poverty rate |
+|  |  |
 
 
-### Data
-The data were collected through [the Moral Machine](http://moralmachine.mit.edu/), an online serious game created by MIT researchers. Users decide the morally preferable action for an autonomous vehicle from two scenarios presented by the game. Each game session is 13 choices long. At the end of the sessions, the user has the option to provide demographic information including their age, gender, annual income, country, and political and religious orientation on a sliding scale. 
+Based on this idea, a higher relative value of following features should increase our suspicion about an OZ designation:
 
-An example of a choice on the Moral Machine.
+- % residents moving in from another county
+- % white population
+- median year of building construction
+- % of housing with multiple units
+- median household income and home value 
+- % of residents who have never been married, and
+- Non-LIC designation,
 
-![A choice](images/machine.png)
+while the following would be negatively related to our suspicion:
 
-Moral Machine data are publicly [available](https://osf.io/3hvt2/?view_only=4bb49492edee4a8eb1758552a362a2cf). Nonetheless, the column names are fairly cryptic and understanding them required parsing the researchers' code in the project repository.
-```
-ScenarioOrder,Intervention,PedPed,Barrier,CrossingSignal,AttributeLevel,ScenarioTypeStrict,ScenarioType,
-DefaultChoice,NonDefaultChoice,DefaultChoiceIsOmission,NumberOfCharacters,DiffNumberOFCharacters,Saved,Template,
-DescriptionShown,LeftHand
+- median age of residents
+- % black population
+- poverty rate
+- housing vacancy rate, and
+- % of housing which are mobile homes.
 
-13,0,0,0,0,Female,Gender,Gender,Male,Female,0,2,0,1,Desktop,0,0
-```
+#### EDA
 
-Each row of the data represents either panel of each scenario. For the right panel in the image above:
-```
-Intervention = 0
-PedPed = 1 // A choice between two groups of pedestrians
-Barrier = 0
-CrossingSignal = 1 // The character spared is crossing legally, 0 means there is no crossing signal
-AttributeLevel = Hooman
-ScenarioType = Species
-DefaultChoice = Hoomans
-NonDefaultChoice = Pets
-DefaultChoiceIsOmission = 0 // Choosing the default choice does not require the car to change course
-NumberOfCharacters = 1
-DiffNumberOFCharacters = 0 // The number of characters killed is consistent no matter the choice
-Saved = 1 // I choose the right panel
-DescriptionShown = 0
-LeftHand = 0
-```
+863 of 8,761 (~10%) designated Opportunity Zones are in Puerto Rico, which makes sense given that the island's median income is about a third of the at-large United States median. Given this, I knew to be wary of Puerto Rico forming its own topics or clusters.
 
-### Question
-
-The authors of the Moral Machine paper found that there were some strong global preferences for saving humans over animals, more people over fewer, and the young over the old. They created three clusters of countries (West, East, and South) [each with a unique profile of preferences.](/images/MIT_cluster_profiles.png)
-
-> I wanted to ask whether we can reasonably claim that moral preferences vary based on geography.
-
-My goal was to group countries by metrics including cluster, type of political system, and percentile groups for different human development indexes (GII, GINI, CPI, etc.) and run significance tests for differences in each factor.
-
-### Method
-
-Unlike the [trolley problem](https://en.wikipedia.org/wiki/Trolley_problem), which is a choice between intervention and utility (saving the most lives), the Moral Machine has numerous dimensions. The authors of the paper used a conjoint analysis to calculate the effect of each factor in a user's choice. Replicating this analysis was beyond the scope of my project (read: "Their math is way over my head.").
-
-I grouped the responses by country and calculated the mean preference for each country. Then I grouped the country means by my chosen metrics, calculate a weighted mean for each group, and compare the distributions of means between groups. My chosen significance level was 0.10.
-
-I ran my calculations with Apache Spark on an Amazon Linux c4.8xlarge EC2 instance. The data generated from the pipeline was small enough (12 statistics x 130 countries) to be processed on my local machine using Pandas and NumPy.
-
-## Results
-
-After working through the calculations, I got as far as grouping by the country clusters identified in the Nature paper. Here I only present a hypothesis test for the difference in gender preferences by cluster.
-
-Directly analyzing country-level means does not account for the relative number of responses from each country. I tried to avoid this shortcoming of my method by bootstrapping individual preferences for each country cluster. NumPy has a `.random.choice()` sampling method that makes it very easy to sample with weighted probabilities. The advantage of this method is that the country-level data was small and could be processed on a local machine.
-
-After bootstrapping an independent *t*-test gave incredibly small *p*-values for almost all the preferences, which makes me somewhat skeptical of my methods. On the other hand, we would expect small *p*-values because the sample size of individual responses is quite large.
-
-#### With bootstrapping
 <p align="center">
-  <img src="images/gender_histsbooted.png" width = 750 height = 800>
-  <img src="images/gender_distributionsbooted.png" width = 600 height = 400>
+  <img src="images/ozs_by_states.png" width = 750 height = 800>
+  <img src="images/age_median_dist.png" width = 750 height = 800>
+  <img src="images/outofcountyflux_dist.png" width = 750 height = 800>
+  <img src="images/p_white_dist.png" width = 750 height = 800>
+
 </p>
 
+
+
+## NMF
 *p*-values from an independent *t*-test with unequal variances for gender preferences between clusters show all significant differences for a significance level of 0.10.
 
 |       |   West |   East |   South |
@@ -117,49 +122,46 @@ The *p*-values from an independent *t*-test with unequal variances for gender pr
 | East  | 0.0838754 | -        | 0.0147172 |
 | South | 0.281225  | 0.0147172 | -         |
 
-## Takeaways
+## Future
 
-1. Ambiguously-labelled data is a problem. I thought understood my dataset after reading the code used to generate the results in the Nature paper, but maybe not. I promise to document my own data carefully enough that another curious person would be able to interpret it.
+1. WCV /silouhette
 
-2. Design the statistical test thoroughly before collecting data or writing the pipeline. I thought I had done this  well enough but my mind must still be more philosophical than statistical.
+2. Use cosine distance metric to account for proportionality in data
 
-3. It is easy to end up with different file versions on AWS EC2 instance and your local machine. My solution was to write functions for reading and writing data that interact with an S3 bucket. `loaddata` looks first in the local directory before fetching from S3, and `uploaddata` writes both locally and to S3. This saves some `scp`'ing and makes it certain that the most up-to-date copy is on AWS.
+3. Refeaturize
 
-4. Create an `~/.aws/credentials` file and put your EC2 instance credentials there before doing anything else on a new instance. Then you won't have to worry about it afterwards.
-
-5. It is useful to know how to adjust the elastic block storage size on an EC2 instance by [adjusting the volume size](https://hackernoon.com/tutorial-how-to-extend-aws-ebs-volumes-with-no-downtime-ec7d9e82426e). 
-
-
-## Spark Efficiency
-
-While trying to make my computations faster, I reworked my pipeline function to reduce the number of Spark *actions* it called. The new function calls `.count()` twice rather than three times. Below are the results running on a `c4.8xlarge`.<sup>[2](#footnote2)</sup>
-<p align="center">
-  <img src="images/functions.png" width = 600 height = 600>
-</p>
-
-I also tested the speeds of several simple Spark functions for fun: `.filter()` and `.groupby()` are lazily-evaluated *transformations*, while `.count()` is an *action* and thus takes significantly longer to execute.
-
-<p align="center">
-  <img src="images/comparison2.png" width = 750 height = 800>
-</p>
-
-`.filter()` and `.groupby()` appear to be approximately constant time. `.count()` is slower, but almost appears constant up to a certain point when it increases.
-
-Another interesting tidbit: the data graphed above actually omits the first datapoint on 10 samples. Below is the full data. I would guess that the first execution is longer either because the processor is switching tasks, or because Spark remembers something about the operation which makes subsequent executions of the same operation faster.
-<p align="center">
-  <img src="images/comparison.png" width = 750 height = 800>
-</p>
+4. Cluster on clusters to figure out which rows load heavily on the "screwy" (– Frank) topics
 
 [Back to top](#content)
 
 ## References
-* [Internal Revenue Code (26 USC §§ 1400Z)](https://www.law.cornell.edu/uscode/text/26/subtitle-A/chapter-1/subchapter-Z)
-* [Definition of "Low-Income Community" – (26 USC § 45D(e)(1))](https://www.law.cornell.edu/uscode/text/26/45D)
-* [QOZ designation procedures (6 CFR 601.601: Rules and regulations)](https://www.irs.gov/pub/irs-drop/rp-18-16.pdf)
-* [Opportunity Zones Resources (CDFI Fund)](https://www.cdfifund.gov/Pages/Opportunity-Zones.aspx)
+<a name="footnote1"><sup>1</sup></a> Critical reporting on Opportunity Zones:
 
+- [How a Trump Tax Break to Help Poor Communities Became a Windfall for the Rich](https://www.nytimes.com/2019/08/31/business/tax-opportunity-zones.html): *The New York Times*  (08/31/2019)
 
-#### Notes
-<a name="footnote1">1</a>: "For example, countries belonging to the Southern cluster show a strong preference for sparing females compared to countries in other clusters."
+- [A Trump Tax Break To Help The Poor Went To a Rich GOP Donor’s Superyacht Marina](https://www.propublica.org/article/superyacht-marina-west-palm-beach-opportunity-zone-trump-tax-break-to-help-the-poor-went-to-a-rich-gop-donor): *Pro Publica* (11/14/2019)
 
-<a name="footnote1">2</a>: By a back-of-the-napkin calculation, if the function execution time was reduced by 2 seconds, I saved myself (130 countries X 6 preferences X 2 seconds) = 1560 seconds or 26 minutes. Considering that the calculation took less than 10 minutes on the EC2, I can't be sure of this estimate.
+- [The Biggest Tax Cut You've Never Heard Of](https://www.economist.com/leaders/2018/11/17/the-biggest-tax-cut-youve-never-heard-of): *The Economist* (11/17/2018)
+
+<a name="footnote2"><sup>2</sup></a> [Bringing Investment to Poor Places](https://www.economist.com/united-states/2018/11/17/bringing-investment-to-poor-places): *The Economist* (11/17/2018)
+
+<a name="footnote3"><sup>3</sup></a> [Opportunity Zones:  What We Know and What We Don’t](https://files.taxfoundation.org/20190107155914/Opportunity-Zones-What-We-Know-and-What-We-Don%E2%80%99t-FF-630.pdf): Eastman, Scott and Nicole Kaeding, *The Tax Foundation* (01/07/2019)
+
+<a name="footnote4"><sup>4</sup></a> [Donald Trump 2020 State of the Union Address, mention of Opportunity Zones](https://www.youtube.com/watch?v=zNECVmfJtxc&t=15m38s): *Youtube* (02/06/2020)
+
+<a name="footnote5"><sup>5</sup></a> [Trump Tax Break That Benefited the Rich Is Being Investigated](https://www.nytimes.com/2020/01/15/business/trump-opportunity-zone-investigation.html?action=click&module=Latest&pgtype=Homepage): *The New York Times*  (01/15/2020)
+
+<a name="footnote6"><sup>6</sup></a> Bills in-progress to regulate Opportunity Zones:
+
+- [S.1344 - A bill to require the Secretary of the Treasury to collect data and issue a report on the opportunity zone tax incentives](https://www.govtrack.us/congress/bills/116/s1344), *govtrack.us*
+
+- [H.R.5042 - Opportunity Zone Reform Act](https://www.govtrack.us/congress/bills/116/hr5042), *govtrack.us*
+
+<a name="footnote7"><sup>7</sup></a> [Definition of "Low-Income Community" – (26 USC § 45D(e)(1))](https://www.law.cornell.edu/uscode/text/26/45D): *law.cornell.edu*
+
+<a name="footnote8"><sup>8</sup></a> [Internal Revenue Code (26 USC §§ 1400Z)](https://www.law.cornell.edu/uscode/text/26/subtitle-A/chapter-1/subchapter-Z): *law.cornell.edu*, and
+
+- [QOZ designation procedures (6 CFR 601.601: Rules and regulations)](https://www.irs.gov/pub/irs-drop/rp-18-16.pdf): *Internal Revenue Code*
+
+[Opportunity Zones Resources](https://www.cdfifund.gov/Pages/Opportunity-Zones.aspx): *CDFI Fund*
+
