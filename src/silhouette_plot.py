@@ -55,7 +55,8 @@ if __name__ == "__main__":
         ax1.set_ylim([0, len(X) + (n_clusters + 1) * 10])
 
         # using KMeans
-        clusterer = DBSCAN(eps=0.87, min_samples=5, n_jobs=-1)
+        clusterer = KMeans(n_clusters=n_clusters, n_jobs=-1)
+        #clusterer = DBSCAN(eps=0.87, min_samples=5, n_jobs=-1)
         labels_ = clusterer.fit_predict(X)
 
         silhouette_avg = silhouette_score(X, labels_)
@@ -84,12 +85,12 @@ if __name__ == "__main__":
             # Compute the new y_lower for next plot
             y_lower = y_upper + 10  # 10 for the 0 samples
 
-        ax1.set_title(f"DBSCAN")
-        ax1.set_xlabel("Silhouette coefficient")
-        ax1.set_ylabel("Cluster")
+        ax1.set_title(f"KMeans (k=6)", fontsize=16)
+        ax1.set_xlabel("Silhouette coefficient", fontsize=14)
+        ax1.set_ylabel("Cluster", fontsize=14)
 
         # The vertical line for average silhouette score of all the values
-        ax1.axvline(x=silhouette_avg, color="k", linestyle="--", label=f"{round(silhouette_avg, 3)}")
+        ax1.axvline(x=silhouette_avg, color="k", linestyle="--", label=f"Mean: {round(silhouette_avg, 3)}", fontsize=14)
 
         ax1.set_yticks([])  # Clear the yaxis labels / ticks
         ax1.set_xticks(np.linspace(x_low, x_high, num=6))
@@ -117,6 +118,6 @@ if __name__ == "__main__":
         #             "with n_clusters = %d" % n_clusters),
         #             fontsize=14, fontweight='bold')
 
-        plt.legend()
-        plt.savefig(f"{images_directory}/silo_DBeps87m5.png")
+        plt.legend(fontsize=14)
+        plt.savefig(f"{images_directory}/silo_KMeans6.png")
         break

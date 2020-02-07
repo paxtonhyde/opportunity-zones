@@ -1,6 +1,6 @@
-# opportunity-zones
+# What's in an Opportunity Zone?
 <p align="center">
-  <img src="images/readme/header.png" width = 900 height = 150>
+  <img src="images/houston_1.jpg" alt="source: New York Times" width=900>
 </p>
 Paxton Hyde
 
@@ -80,9 +80,8 @@ We can get a sense of the "normal" values for our shotgun features by looking at
 Note that the designation of OZs is not suspect because the tracts differ from the general population. Rather, they would be suspect because they have a particular combination of features. For example, a tract which was young because it is in the middle of the city or has many young families should be differentiated from a tract which is young because it is mostly students.
 
 <p align="center">
-  <img src="images/demography/age_median_dist.png" width=400><img src="images/demography/p_white_dist.png" width=400>
-
-  <img src="images/demography/vacancy_dist.png" width=400><img src="images/demography/outofcountyflux_dist.png" width=400>
+<img src="images/demography/age_median_dist.png" width=400><img src="images/demography/p_white_dist.png" width=400>
+<img src="images/demography/vacancy_dist.png" width=400><img src="images/demography/outofcountyflux_dist.png" width=400>
 </p>
 
 ## NMF
@@ -111,7 +110,7 @@ Cluster 5 loads heavily on not being a *low-income community*, and has some othe
   <img src="images/nmf_error.png" width=400>
 </p>
 
-There was no clear elbow in the reconstruction error, so I wanted to see what the "optimum" number of clusters looks like. At this level, the clusters have lost interpretability because they are grouped on one or two less significant features.
+There was no clear elbow in the reconstruction error, so I wanted to see what the "optimum" number of clusters looks like. At this level, the clusters have lost interpretability because they are grouped on just one or two features.
 
 <p align="center">
   <img src="images/nmf_clusters_14.png" width=700>
@@ -127,22 +126,42 @@ Based on this NMF, it looks like I will have to re-featurize for my next capston
 
 * Population is a not very useful feature given that tracts vary in area. Maybe state-level population density could substitute until I find densities on a tract level.
 
+* Add noncollinear demographic information, such as educational attainment.
+
 ## Clustering
 
-I found a KMeans clusterer to produce the most interpretable archetypes, like I was seeing with NMF. 
+I found a KMeans clusterer to produce the most interpretable archetypes, as I was seeing with NMF.
 <p align="center">
   <img src="images/KMeans_6.png" width=700>
   <img src="images/screencaps/KM_k6.png" width=700>
 </p>
+Cluster 0 is more towards generic America, although may be skewed by the fact that California, New York, and Massachusetts have higher costs of living. Cluster 4 is heavily weighted on not being a LIC, although given that the weightings of household income and whiteness are large on an absolute scale, it fits in with cluster 0.
+
+Cluster 1 is "inner-city." 
+
+Cluster 2 is a young gentrifying neighborhood or university campus (suspect!). 
+
+Cluster 3 is Puerto Rico.
+
+Cluster 5 is older, whiter, poorer suburbs.
+
+#### Silhouette
+
+A silhouette coefficient is a measure of the ratio of the intra- to inter-cluster distances on the range -1 to 1. The silhouette plot displays this coefficient for each observation.
 
 <p align="center">
-  <img src="images/silo_KMeans6.png" width=400 height=300>
+  <img src="images/silo_KMeans6.png" width=500 height=500>
 </p>
+Although this plot is not a great look, it does tell us two interesting things:
+
+1. KMeans clustered Puerto Rico because there some absolute values are significantly different than the rest of the U.S. (household income, for example), but *not* because Puerto Rican tracts are similar. This gives more reason to exclude Puerto Rico completely unless we can account for geographical differences in cost of living.
+
+2. Cluster 1 and 2, which we think represent more urban areas, are small because their archetype is not well-defined by the features. Other clusters actually accomodate those tracts which do not fit the urban archetype as well.
 
 #### DBCAN
 The DBSCAN algorithm searches for areas of density based on a distance parameter and a minimum number of samples forming a core area. 
 
-I found that this clusterer tended to find similar groups multiple times. It is essentially looking for pockets homogeneity. Clusters 2, 3, 5, and 7 are almost identical, with the rest being very similar except with more mobile homes and varying household income. The homogeneity is also represented in the majority states for each cluster, which tend to be places without dynamic cities that we would expect to have tracts of interest.
+I found that this clusterer tended to find similar groups multiple times. It is essentially looking for pockets of homogeneity. Clusters 2, 3, 5, and 7 are almost identical, with the rest being very similar except with more mobile homes and varying household income. The homogeneity is also represented in the majority states for each cluster, which tend to be places without dynamic cities that we would expect to have tracts of interest.
 
 A possible use of DBSCAN in a future iteration would be to look closer at the outliers it produces.
 
@@ -153,11 +172,13 @@ A possible use of DBSCAN in a future iteration would be to look closer at the ou
 
 ## Next Steps
 
-1. Refeaturize based on my outline in the NMF section
+1. Refeaturize based on my outline in the NMF section and reading how other researchers have evaluated Opportunity Zones
 
-2. Test a cosine distance metric to account for proportionality in data
+2. Test a cosine distance metric in clustering to account for different costs of living across states
 
-3. Cluster on clusters to figure out which rows load heavily on the "screwy" (– Frank) topics
+3. Use a stacked clustering model to find outlier clusters (by clustering on clusters), or more fine-grained clusters (by clustering within clusters)
+
+4. Use the word "cluster" another 100,000 times
 
 [Back to top](#content)
 
