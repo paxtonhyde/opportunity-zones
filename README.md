@@ -16,7 +16,7 @@ Galvanize Data Science Immersive Capstone 2, February 2020
 
 ## Background
 
-The Tax Cuts and Jobs Act of 2017 introduced an Opportunity Zone (OZ) program that allows capital gains tax deferrals and other benefits for investments in designated census tracts. The purpose of the program is to encourage investment in struggling communities. The idea is that the tax benefits will offset extra costs and risks associated with developing in neglected areas with smaller markets. News reporting critiques the program over its liberal designation process, which risks make the tax benefits a giveaway to wealthy investors who would have developed in any case.<sup>[1](#footnote1)</sup> For example, the Economist notes that a tract in downtown Portland, ME that hosts 200 tourists annually was designated as an Opportunity Zone.<sup>[2](#footnote2)</sup>
+The Tax Cuts and Jobs Act of 2017 introduced an Opportunity Zone (OZ) program that allows capital gains tax deferrals and other benefits for investments in designated census tracts. The purpose of the program is to encourage investment in struggling communities. The idea is that the tax benefits will offset extra costs and risks associated with developing in neglected areas with smaller markets. News reporting critiques the program over its liberal designation process, which risks make the tax benefits a giveaway to wealthy investors who would have developed in any case.<sup>[1](#footnote1)</sup> The Economist notes, for example, that a tract in downtown Portland, Maine that hosts 200 thousand tourists annually was designated as an OZ.<sup>[2](#footnote2)</sup>
 
 Furthermore, research does not suggest that place-based tax incentive programs are particularly effective. It seems that any new jobs created simply replace old jobs that already existed or are taken by high-skilled workers who move in from elsewhere.<sup>[3](#footnote3)</sup>
 
@@ -31,7 +31,7 @@ State Governors nominate Census Tracts in their state as OZs, and the Secretary 
  
 - it is adjacent to an LIC and has a median household income of no more than 125% of that tract. 
 
-Governors may nominate up to one-quarter of the LIC tracts in their state, or up to 25 if their state has less than 100 LICs. In addition, they may nominate a number of LIC-adjacent tracts up to five percent of the total tracts in the state. Designations may be based on data from the 2011-2015 or more recent American Community Survey (ACS) 5-year estimate.<sup>[8](#footnote8)</sup>
+Governors may nominate up to one-quarter of the LIC tracts in their state, or up to 25 if their state has less than 100 LICs. In addition, they may nominate a number of LIC-adjacent tracts up to five percent of the total tracts in the state. Designations may be based on data from the 2011-2015 or more recent American Community Survey (ACS) 5-year estimates.<sup>[8](#footnote8)</sup>
 
 #### Method
 
@@ -45,7 +45,7 @@ Based on the reporting of the misdesignation of OZs providing tax benefits to ce
 
 #### Feature Selection
 
-I gathered data for OZ tracts from the 2011-2015 ACS 5-year estimates using the Census Data API and the `census` module from PyPi. I picked features using a "shotgun" method, keeping in mind that I need them to differentiate *suspect* from legitimate OZs. 
+I gathered data for OZ tracts from the 2011-2015 ACS 5-year estimates using the Census Data API and the [`census`](https://pypi.org/project/census/) module off PyPi. I picked features using a "shotgun" method, keeping in mind that I need them to differentiate *suspect* from legitimate OZs. 
 
 Gentrifying areas generally have:
 - an influx of people
@@ -55,31 +55,17 @@ Gentrifying areas generally have:
 - recent development, and 
 - increasing home values.
 
+Based on this idea, the relative values of following features should increase our suspicion about an OZ designation.
+
 | +   | - |
 |-------|--------|
-| % residents moving in from another county |      median age of residents|
+| % of residents who have never been married |      median age of residents|
 | % white population  |     % black population |
-| median household income and home value  |      poverty rate |
-|  |  |
-
-
-Based on this idea, a higher relative value of following features should increase our suspicion about an OZ designation:
-
-- % residents moving in from another county
-- % white population
-- median year of building construction
-- % of housing with multiple units
-- median household income and home value 
-- % of residents who have never been married, and
-- Non-LIC designation,
-
-while the following would be negatively related to our suspicion:
-
-- median age of residents
-- % black population
-- poverty rate
-- housing vacancy rate, and
-- % of housing which are mobile homes.
+| median household income and home value  |    poverty rate |
+| % of housing with multiple units | % of housing which are mobile homes |
+| % residents moving in from another county in the past year | housing vacancy rate |
+| median year of building construction | |
+| LIC-adjacent community | *low income community* |
 
 #### EDA
 
@@ -87,11 +73,22 @@ while the following would be negatively related to our suspicion:
 
 <p align="center">
   <img src="images/ozs_by_states.png" width = 750 height = 800>
-  <img src="images/age_median_dist.png" width = 750 height = 800>
-  <img src="images/outofcountyflux_dist.png" width = 750 height = 800>
-  <img src="images/p_white_dist.png" width = 750 height = 800>
-
 </p>
+<div class="row">
+    <div class="column">
+        <img src="images/demography/age_median_dist.png" style="width:100%">
+    </div><div class="column">
+        <img src="images/demography/p_white_dist.png" style="width:100%">
+    </div>
+</div>
+<div class="row">
+    <div class="column">
+        <img src="images/demography/outofcountyflux_dist.png" width = 750 height = 800>
+    </div><div class="column">
+        <img src="images/demography/vacancy_dist.png" width = 750 height = 800>
+    </div>
+</div>
+
 
 
 
