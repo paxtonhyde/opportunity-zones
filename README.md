@@ -1,6 +1,6 @@
 # opportunity-zones
 <p align="center">
-  <img src="images/header.png" width = 900 height = 150>
+  <img src="images/readme/header.png" width = 900 height = 150>
 </p>
 Paxton Hyde
 
@@ -10,8 +10,8 @@ Galvanize Data Science Immersive Capstone 2, February 2020
 - [Background](#background)
 - [Data](#data)
 - [Topic modeling with NMF](#NMF)
-- [Hard clustering](#Clustering)
-- [Takeaways](#takeaways)
+- [Hard clustering](#clustering)
+- [Future work](#nextsteps)
 - [References](#references)
 
 ## Background
@@ -23,7 +23,6 @@ Furthermore, research does not suggest that place-based tax incentive programs a
 President Trump has recently claimed victory for the program even though it is under investigation by the Treasury Department.<sup>[4,](#footnote4)</sup><sup>[5](#footnote5)</sup> Congress also has not introduced regulation requiring data collection and reports on the effects of the program.<sup>[6](#footnote6)</sup>
 
 #### Opportunity Zone Designation Process
-todo: flow chart
 
 State Governors nominate Census Tracts in their state as OZs, and the Secretary of the Treasury approves these selections. A tract is eligible if:
  
@@ -33,7 +32,7 @@ State Governors nominate Census Tracts in their state as OZs, and the Secretary 
 
 Governors may nominate up to one-quarter of the LIC tracts in their state, or up to 25 if their state has less than 100 LICs. In addition, they may nominate a number of LIC-adjacent tracts up to five percent of the total tracts in the state. Designations may be based on data from the 2011-2015 or more recent American Community Survey (ACS) 5-year estimates.<sup>[8](#footnote8)</sup>
 
-#### Method
+#### This Study's Method
 
 Based on the reporting of the misdesignation of OZs providing tax benefits to certain tracts which are already gentrifying or seem undeserving for other reasons, the goals of this project are to:
 
@@ -65,69 +64,100 @@ Based on this idea, the relative values of following features should increase ou
 | % of housing with multiple units | % of housing which are mobile homes |
 | % residents moving in from another county in the past year | housing vacancy rate |
 | median year of building construction | |
-| LIC-adjacent community | *low income community* |
+| LIC-adjacent community | *(low income community)* |
 
 #### EDA
 
 863 of 8,761 (~10%) designated Opportunity Zones are in Puerto Rico, which makes sense given that the island's median income is about a third of the at-large United States median. Given this, I knew to be wary of Puerto Rico forming its own topics or clusters.
 
 <p align="center">
-  <img src="images/ozs_by_states.png" width = 750 height = 800>
+  <img src="images/ozs_by_states.png" width = 700 height = 450>
 </p>
-<div class="row">
-    <div class="column">
-        <img src="images/demography/age_median_dist.png" style="width:100%">
-    </div><div class="column">
-        <img src="images/demography/p_white_dist.png" style="width:100%">
-    </div>
-</div>
-<div class="row">
-    <div class="column">
-        <img src="images/demography/outofcountyflux_dist.png" width = 750 height = 800>
-    </div><div class="column">
-        <img src="images/demography/vacancy_dist.png" width = 750 height = 800>
-    </div>
-</div>
 
 
+We can get a sense of the "normal" values for our shotgun features by looking at their distributions. OZs are generally younger (~35), less white (~55%), and have a higher vacancy rate than the rest of the country. "Out of county flux" is the percent of residents who moved from another county in the past year, which is ~8% for OZs.
 
-
-## NMF
-*p*-values from an independent *t*-test with unequal variances for gender preferences between clusters show all significant differences for a significance level of 0.10.
-
-|       |   West |   East |   South |
-|-------|--------|--------|---------|
-| West  |      - |      0 |       0 |
-| East  |      0 |      - |       0 |
-| South |      0 |      0 |       - |
-
-(Note that these values are unrounded, maybe `scipy.stats.ttest_ind()` rounds very very small numbers to 0.)
-
-#### Without bootstrapping
-Note that this direct (non-bootstrapped) test of country-level means does not control for the relative number of responses from each country.
+Note that the designation of OZs is not suspect because the tracts differ from the general population. Rather, they would be suspect because they have a particular combination of features. For example, a tract which was young because it is in the middle of the city or has many young families should be differentiated from a tract which is young because it is mostly students.
 
 <p align="center">
-  <img src="images/gender_hists.png" width = 750 height = 800>
-  <img src="images/gender_distributions.png" width = 600 height = 400>
+  <img src="images/demography/age_median_dist.png" width=400><img src="images/demography/p_white_dist.png" width=400>
+
+  <img src="images/demography/vacancy_dist.png" width=400><img src="images/demography/outofcountyflux_dist.png" width=400>
 </p>
 
-The *p*-values from an independent *t*-test with unequal variances for gender preferences between clusters still show some significant differences for a significance level of 0.10. The Eastern cluster seems significantly different from the other clusters, which is not exactly what we expect based on the professional results.<sup>[1](#footnote1)</sup>
+## NMF
 
-|       |      West |      East |     South |
-|-------|-----------|-----------|-----------|
-| West  | -         | 0.0838754 | 0.281225  |
-| East  | 0.0838754 | -        | 0.0147172 |
-| South | 0.281225  | 0.0147172 | -         |
+The first goal of the project is to describe the archetypes of designated Opportunity Zones. Because I am essentially looking for outliers in the data, I knew I would need to sift through some other archetypes before I found a type with a suspect combination of features. The idea behind using soft clustering is that it would make sense that a neighborhood could be categorized in multiple ways. (LoHi, for example, is often a mix of very new apartments and older single family houses.)
 
-## Future
+These plots of the non-negative matrix factorization (NMF) components for each component (group, in other words) show how much each feature effects the likelihood of a particular observation (an OZ tract, in this case) being in a particular cluster.
 
-1. WCV /silouhette
+<p align="center">
+  <img src="images/nmf_clusters_6.png" width=700>
+</p>
 
-2. Use cosine distance metric to account for proportionality in data
+Cluster 0 looks more like the U.S. average than a low-income community, given that it has higher weights of % white, household income, and age. Lightly suspicious.
 
-3. Refeaturize
+Cluster 1 looks like a developed urban area or university campus.
 
-4. Cluster on clusters to figure out which rows load heavily on the "screwy" (– Frank) topics
+Cluster 2 looks like what some might call an "inner-city" (read: poor black neighborhood) archetype.
+
+Cluster 3 is almost too sparse to interpret, but could be a tract is recently developed.
+
+Cluster 4 looks almost like a university campus.
+
+Cluster 5 loads heavily on not being a *low-income community*, and has some other features that we would expect to accompany that type.
+
+<p align="center">
+  <img src="images/nmf_error.png" width=400>
+</p>
+
+There was no clear elbow in the reconstruction error, so I wanted to see what the "optimum" number of clusters looks like. At this level, the clusters have lost interpretability because they are grouped on one or two less significant features.
+
+<p align="center">
+  <img src="images/nmf_clusters_14.png" width=700>
+</p>
+
+Based on this NMF, it looks like I will have to re-featurize for my next capstone:
+
+* The year a structure is built weighed on most of the categories in my six-component sample. This makes sense given that the difference between 1940 and 1970 on a unit scale is both small, and the absolute value is always large when scaled by the largest value for the feature. 
+
+* Whether a tract is a *low-income community* or adjacent to one is the only categorical feature, and so weighed very heavily on one cluster at the expense of other features.
+
+* It could simplify my model to eliminate features that we would suspect to be indirectly related, such as median age and % never married, vacancy and out-of-county influx, multiple-unit structures and % mobile homes, and maybe home value and household income.
+
+* Population is a not very useful feature given that tracts vary in area. Maybe state-level population density could substitute until I find densities on a tract level.
+
+## Clustering
+
+I found a KMeans clusterer to produce the most interpretable archetypes, like I was seeing with NMF. 
+<p align="center">
+  <img src="images/KMeans_6.png" width=700>
+  <img src="images/screencaps/KM_k6.png" width=700>
+</p>
+
+<p align="center">
+  <img src="images/silo_KMeans6.png" width=400 height=300>
+</p>
+
+#### DBCAN
+The DBSCAN algorithm searches for areas of density based on a distance parameter and a minimum number of samples forming a core area. 
+
+I found that this clusterer tended to find similar groups multiple times. It is essentially looking for pockets homogeneity. Clusters 2, 3, 5, and 7 are almost identical, with the rest being very similar except with more mobile homes and varying household income. The homogeneity is also represented in the majority states for each cluster, which tend to be places without dynamic cities that we would expect to have tracts of interest.
+
+A possible use of DBSCAN in a future iteration would be to look closer at the outliers it produces.
+
+<p align="center">
+  <img src="images/DBSCAN_eps87m5.png" width=700>
+  <img src="images/screencaps/DBSCAN.png" width=700>
+</p>
+
+## Next Steps
+
+1. Refeaturize based on my outline in the NMF section
+
+2. Test a cosine distance metric to account for proportionality in data
+
+3. Cluster on clusters to figure out which rows load heavily on the "screwy" (– Frank) topics
 
 [Back to top](#content)
 

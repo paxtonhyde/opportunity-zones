@@ -87,10 +87,10 @@ if __name__ == "__main__":
     algorithms = ['MeanShift', 'KMeans', 'DBSCAN']
     ## {eps:0.85, min_samples:5} = ~8
     ## w/o LIC {eps:2, min_samples:3} = 3
-    n = 0
+    n = 1
     k = 3
     ## build model
-    pax = Clusterer(algorithms[n], drop, n_jobs=-1)
+    pax = Clusterer(algorithms[n], drop, n_clusters=6, n_jobs=-1)
     centers = pax.fit(X)
     if algorithms[n] == 'DBSCAN':
         centers = map_cores_to_centers(pax.estimator, X)
@@ -109,7 +109,7 @@ if __name__ == "__main__":
 
     cluster_plots(centers, features)
     plt.tight_layout()
-    plt.savefig(f"{images_directory}/{algorithms[n]}_{'def'}.png", dpi=120)
+    #plt.savefig(f"{images_directory}/{algorithms[n]}_{'eps87m5'}.png", dpi=120)
     plt.show()
 
     ## calculate majority state by cluster
@@ -123,8 +123,8 @@ if __name__ == "__main__":
     for k, v in states.items():
         print("Cluster {} states -> {}".format(k, v))
 
-    cluster2 = dataframe[dataframe['cluster'] == 2]
-    cluster2.to_pickle(f"{data_directory}/MScluster2.pkl")
+    # cluster2 = dataframe[dataframe['cluster'] == 2]
+    # cluster2.to_pickle(f"{images_directory}/MScluster2.pkl")
 
     
 
