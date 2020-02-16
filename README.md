@@ -152,9 +152,9 @@ A silhouette coefficient is a measure of the ratio of the intra- to inter-cluste
 <p align="center">
   <img src="images/silo_KMeans6.png" width=500 height=450>
 </p>
-Although this plot is not a great look, it does tell us two interesting things:
+Although the accuracy of this plot is not a great look, it does tell us two interesting things:
 
-1. KMeans clustered Puerto Rico because there some absolute values are significantly different than the rest of the U.S. (household income, for example), but *not* because Puerto Rican tracts are similar. This gives more reason to exclude Puerto Rico completely unless we can account for geographical differences in cost of living.
+1. KMeans clustered Puerto Rico because it has some absolute values that are significantly different than the rest of the U.S. (household income, for example), but *not* because Puerto Rican tracts are similar. This gives more reason to exclude Puerto Rico completely unless we can account for geographical differences in cost of living.
 
 2. Cluster 1 and 2, which we think represent more urban areas, are small because their archetype is not well-defined by the features. Other clusters actually accomodate those tracts which do not fit the urban archetype as well.
 
@@ -212,4 +212,6 @@ A possible use of DBSCAN in a future iteration would be to look closer at the ou
 - [QOZ designation procedures (6 CFR 601.601: Rules and regulations)](https://www.irs.gov/pub/irs-drop/rp-18-16.pdf): *Internal Revenue Code*
 
 [Opportunity Zones Resources](https://www.cdfifund.gov/Pages/Opportunity-Zones.aspx): *CDFI Fund*
+
+[Distress Index source](https://www.brookings.edu/research/the-early-results-of-states-opportunity-zones-are-promising-but-theres-still-room-for-improvement/#footnote-1): *Brookings Institute*
 
