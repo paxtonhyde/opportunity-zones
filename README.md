@@ -1,6 +1,6 @@
 # What's in an Opportunity Zone?
 <p align="center">
-  <img src="images/houston_1.jpg" alt="source: New York Times" width=900>
+  <img src="images/old/houston_1.jpg" alt="source: New York Times" width=900>
 </p>
 Paxton Hyde
 
@@ -71,7 +71,7 @@ Based on this idea, the relative values of following features should increase ou
 863 of 8,761 (~10%) designated Opportunity Zones are in Puerto Rico, which makes sense given that the island's median income is about a third of the at-large United States median. Given this, I knew to be wary of Puerto Rico forming its own topics or clusters.
 
 <p align="center">
-  <img src="images/ozs_by_states.png" width = 700 height = 450>
+  <img src="images/old/ozs_by_states.png" width = 700 height = 450>
 </p>
 
 
@@ -80,8 +80,8 @@ We can get a sense of the "normal" values for our shotgun features by looking at
 Note that the designation of OZs is not suspect because the tracts differ from the general population. Rather, they would be suspect because they have a particular combination of features. For example, a tract which was young because it is in the middle of the city or has many young families should be differentiated from a tract which is young because it is mostly students.
 
 <p align="center">
-<img src="images/demography/age_median_dist.png" width=400><img src="images/demography/p_white_dist.png" width=400>
-<img src="images/demography/vacancy_dist.png" width=400><img src="images/demography/outofcountyflux_dist.png" width=400>
+<img src="images/old/demography/age_median_dist.png" width=400><img src="images/demography/p_white_dist.png" width=400>
+<img src="images/old/demography/vacancy_dist.png" width=400><img src="images/demography/outofcountyflux_dist.png" width=400>
 </p>
 
 ## NMF
@@ -91,7 +91,7 @@ The first goal of the project is to describe the archetypes of designated Opport
 These plots of the non-negative matrix factorization (NMF) components for each component (group, in other words) show how much each feature effects the likelihood of a particular observation (an OZ tract, in this case) being in a particular cluster.
 
 <p align="center">
-  <img src="images/nmf_clusters_6.png" width=850>
+  <img src="images/old/nmf_clusters_6.png" width=850>
 </p>
 
 Cluster 0 looks more like the U.S. average than a low-income community, given that it has higher weights of % white, household income, and age. Lightly suspicious.
@@ -107,13 +107,13 @@ Cluster 4 looks almost like a university campus.
 Cluster 5 loads heavily on not being a *low-income community*, and has some other features that we would expect to accompany that type.
 
 <p align="center">
-  <img src="images/nmf_error.png" width=400>
+  <img src="images/old/nmf_error.png" width=400>
 </p>
 
 There was no clear elbow in the reconstruction error, so I wanted to see what the "optimum" number of clusters looks like. At this level, the clusters have lost interpretability because they are grouped on just one or two features.
 
 <p align="center">
-  <img src="images/nmf_clusters_14.png" width=850>
+  <img src="images/old/nmf_clusters_14.png" width=850>
 </p>
 
 Based on this NMF, it looks like I will have to re-featurize for my next capstone:
@@ -132,8 +132,8 @@ Based on this NMF, it looks like I will have to re-featurize for my next capston
 
 I found a KMeans clusterer to produce the most interpretable archetypes, as I was seeing with NMF.
 <p align="center">
-  <img src="images/KMeans_6.png" width=850>
-  <img src="images/screencaps/KM_k6.png" width=800>
+  <img src="images/old/KMeans_6.png" width=850>
+  <img src="images/old/screencaps/KM_k6.png" width=800>
 </p>
 Cluster 0 is more towards generic America, although may be skewed by the fact that California, New York, and Massachusetts have higher costs of living. Cluster 4 is heavily weighted on not being a LIC, although given that the weightings of household income and whiteness are large on an absolute scale, it fits in with cluster 0.
 
@@ -150,7 +150,7 @@ Cluster 5 is older, whiter, poorer suburbs.
 A silhouette coefficient is a measure of the ratio of the intra- to inter-cluster distances on the range -1 to 1. The silhouette plot displays this coefficient for each observation.
 
 <p align="center">
-  <img src="images/silo_KMeans6.png" width=500 height=450>
+  <img src="images/old/silo_KMeans6.png" width=500 height=450>
 </p>
 Although the accuracy of this plot is not a great look, it does tell us two interesting things:
 
@@ -166,8 +166,8 @@ I found that this clusterer tended to find similar groups multiple times. It is 
 A possible use of DBSCAN in a future iteration would be to look closer at the outliers it produces.
 
 <p align="center">
-  <img src="images/DBSCAN_eps87m5.png" width=850>
-  <img src="images/screencaps/DBSCAN.png" width=700>
+  <img src="images/old/DBSCAN_eps87m5.png" width=850>
+  <img src="images/old/screencaps/DBSCAN.png" width=700>
 </p>
 
 ## Next Steps

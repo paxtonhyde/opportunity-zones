@@ -4,10 +4,10 @@ __pycache__
 .ipynb_checkpoints/
 spark-warehouse/
 
-## don't load github with data ##
-data/
+## extra stuff ##
+data/old/
+notebooks/
 
 ## specific files ##
-proposal.md
 notes_README.md
 clustering_cuts.txt
