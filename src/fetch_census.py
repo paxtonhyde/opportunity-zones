@@ -1,5 +1,6 @@
 import pandas as pd
-from get_census import census_fetcher, census_key
+import numpy as np
+from census_fetcher import census_fetcher, census_key
 
 import os
 src_directory = os.path.realpath(".")
@@ -15,37 +16,61 @@ def build_fields(query_dict):
 
     return tuple(fields)
 
+def fetch_states(fetcher, variables, geoids, limiter=0):
+    '''geoids must be unique for each state
+    '''
+    data = []
+    for state in geoids:
+        state_tracts = fetcher.get_state_tracts(variables, state)
+        data.extend(state_tracts)
+        print(f'Got state {str(state)}')
+
+        limiter -= 1
+        if limiter == 0:
+            break
+
+    return np.array(data)
+
+def join_columns_as_str(df, columns, new_column):
+    df[new_column] = df[columns].apply(lambda row : ''.join(row.astype(str)), axis=1)
+    df.drop(columns=columns, inplace=True)
+
+
 if __name__ == "__main__":
 
-    import OZ_variables
-    q_dict, labels = OZ_variables.query_dict, OZ_variables.query_labels
-    OZ_fields = build_fields(q_dict)
+    from census_variables import query_dict, query_labels
+    fields = build_fields(query_dict)
 
-    QOZs = pd.read_pickle(f"{data_directory}/qozs_clean.pkl")['census_tract_number'].astype(str)
+    tracts = pd.read_csv(f"{data_directory}/oz_acs_data_brookings.csv")
+    states = np.unique(tracts['state_id']).astype(str)
 
-    dataset = 'acs5'
-    year = 2015
+    l = 0
+
+    # build
+    year, dataset = 2017, 'acs5'
     pax_fetcher = census_fetcher(census_key, year, dataset)
+    data_columns = [t+"_"+v+str(year) for t in query_labels.keys() for v in query_labels[t]]
+    data_columns.extend(['state', 'county', 'tract']) # the api also returns state, county, and tract
 
-    census_data_columns = [t+"_"+v for t in labels.keys() for v in labels[t]]
-    QOZ_census_data = pd.DataFrame(columns=census_data_columns)
+    # get 2017
+    print("Getting {} data for {}".format(dataset, year))
+    array = fetch_states(pax_fetcher, fields, states, limiter=l)
+    seventeen = pd.DataFrame(array, columns=data_columns)
+    join_columns_as_str(seventeen, ['state', 'county', 'tract'], 'geoid')
 
-    ## do it by 500 line block?, also could write line by line
-    limiter = 9000
-    for tract in QOZs.values:
-        tract_data = pax_fetcher.get_tract_data(OZ_fields, tract)
-        tract_data = [d for d in tract_data]
-        print(f'Got {str(tract)}')
+    # and 2012
+    year = 2012
+    pax_fetcher.year = year
+    data_columns = [t+"_"+v+str(year) for t in query_labels.keys() for v in query_labels[t]]
+    data_columns.extend(['state', 'county', 'tract']) # the api also returns state, county, and tract
 
-        row = pd.DataFrame([tract_data], columns=census_data_columns)
+    print("Getting {} data for {}".format(dataset, year))
+    array = fetch_states(pax_fetcher, fields, states, limiter=l)
+    twelve = pd.DataFrame(array, columns=data_columns)
+    join_columns_as_str(twelve, ['state', 'county', 'tract'], 'geoid')
 
-        ## !!! requires ~2X the size of the dataframe in memory
-        QOZ_census_data = QOZ_census_data.append(row, ignore_index=True)
-        print(QOZ_census_data)
-        if limiter <= 0:
-            break
-        limiter -= 1
-
-    #QOZ_census_data['tract_number'] = QOZs.values[:limiter]
-
-    QOZ_census_data.to_pickle(f"{data_directory}/{dataset}-{str(year)[-2:]}.csv")
+    # join and write
+    fname = "census_raw.pkl"
+    master = seventeen.merge(twelve, on='geoid')
+    master.to_pickle(f"{data_directory}/{fname}")
+    print(f"Wrote -->> {fname}")
