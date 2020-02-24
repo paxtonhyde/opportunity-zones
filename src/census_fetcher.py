@@ -8,6 +8,7 @@ class census_fetcher():
         self.key = key
         self.year = year
         self.c = Census(self.key, year=self.year)
+        self.datasetname = dataset
         self.c.dataset = self._pick_dataset(dataset)
 
     def _pick_dataset(self, dataset):

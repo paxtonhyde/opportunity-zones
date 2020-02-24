@@ -1,35 +1,14 @@
 import pandas as pd
 import numpy as np
-from us import states
 
-import os
-this_directory = os.path.realpath(".")
-home_directory = os.path.split(this_directory)[0]
-data_directory = os.path.join(home_directory, "data")
+class census_featurizer():
+
+    def __init__(self, dataframe):
+        self.dataframe = dataframe
+
+    def     
 
 if __name__ == "__main__":
-
-    ## !!! make sure that the newer version isn't a pickle
-    try : 
-        all_tracts = pd.read_pickle("{}/acs5-15.pkl".format(data_directory)).drop(columns=['Unnamed: 0'])
-    except : 
-        all_tracts = pd.read_csv("{}/acs5-15.csv".format(data_directory)).drop(columns=['Unnamed: 0'])
-
-
-    qoz_numbers = pd.read_pickle("{}/qozs_1.pkl".format(data_directory))['census_tract_number']
-    tract_numbers = qoz_numbers
-    states = qoz_numbers.apply(lambda row : row[:2])
-
-    ## DISCARD BAD LINES
-    # 1 : tracts where the api returned nothing
-    a = (all_tracts != -1)
-    tracts = all_tracts[a.all(axis=1)]
-
-    # 2 : those 2 tracts from AZ and SD that had no data
-    tracts = tracts[tracts['population_total'] != 0]
-
-    ## replace negative values (not found) with nan
-    tracts.where(tracts >= 0, inplace=True, errors='ignore')
 
     ## MAKE NEW COLUMNS
     pop = tracts['population_total']
@@ -38,8 +17,6 @@ if __name__ == "__main__":
     #     going to just use total population, looks closer than tenure_total
     # tenure_total = total population in occupied housing units
     # poverty = universe of people for whom poverty status is determined (!)
-    tracts['p_never_married'] = tracts['marriage_never_married'] / tracts['marriage_total']
-    tracts['outofcountyflux'] = 1 - ((tracts['mobility_same_house_1yr'] + tracts['mobility_same_county_1yr']) / pop)
     tracts['p_black'] = tracts['race_black'] / pop
     tracts['p_white'] = tracts['race_white'] / pop
     tracts['poverty'] = tracts['poverty_poor'] / pop

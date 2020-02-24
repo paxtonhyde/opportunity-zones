@@ -30,7 +30,7 @@ State Governors nominate Census Tracts in their state as OZs, and the Secretary 
  
 - it is adjacent to an LIC and has a median household income of no more than 125% of that tract. 
 
-Governors may nominate up to one-quarter of the LIC tracts in their state, or up to 25 if their state has less than 100 LICs. In addition, they may nominate a number of LIC-adjacent tracts up to five percent of the total tracts in the state. Designations may be based on data from the 2011-2015 or more recent American Community Survey (ACS) 5-year estimates.<sup>[8](#footnote8)</sup>
+Governors may nominate up to one-quarter of the LIC tracts in their state, or up to 25 if their state has less than 100 LICs. In addition, they may nominate a number of LIC-adjacent tracts up to five percent of the total tracts in the state. Designations may be based on data from 2011-2015 or more recent American Community Survey (ACS) 5-year estimates.<sup>[8](#footnote8)</sup>
 
 #### This Study's Method
 
