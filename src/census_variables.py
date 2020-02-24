@@ -14,15 +14,24 @@ query_dict = {'B01003':['001E'],
 query_labels = {'population':['total'],
                 'age':['median'],
                 'race':['white', 'black'],
-                'poverty':['poor'],
+                'poverty':[''],
                 'household_income':['median'],
                 'home_value':['median'],
                 'tenure':['total', 'owner'],
                 'occupancy':['total', 'vacant'],
                 'structure_year':['median'],
-                'structure_units':['total', 'one_a', 'one_d', 'mobile'],
+                'housing_units':['total', 'one_a', 'one_d', 'mobile'],
                 'education':['universe', 'bachelor', 'master', 'prof', 'doc'],
                 'enrollment':['universe', 'undergrad', 'grad']}
+
+universe_to_column_mapping = {"population_total":["race_white", "race_black", "poverty_"],\
+           "tenure_total":["tenure_owner"],\
+            "occupancy_total":["occupancy_vacant"],\
+            "housing_units_total":["housing_units_mobile", {"single_unit_housing": ["housing_units_one_a", "housing_units_one_d"]}],\
+              "education_universe":[{"bachelorsplus": ["education_bachelor", "education_master", "education_prof", "education_doc"]}],\
+              "enrollment_universe":[{"enrolled":["enrollment_undergrad", "enrollment_grad"]}]}
+
+delta_features = ['population_total', 'household_income_median', 'home_value_median', 'housing_units_total']
 
 us_averages = {'household_income_median': 63179, 
         'age_median': 38.2,
