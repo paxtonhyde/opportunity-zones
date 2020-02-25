@@ -72,7 +72,6 @@ def make_delta_columns(dataframe, columns_no_year, years):
             delta.append(c + str(y))
             
         dataframe["change_{}".format(c)] = ( dataframe[delta[1]] - dataframe[delta[0]] ) / dataframe[delta[0]]
-        dataframe.drop(columns=delta, inplace=True)
     return dataframe
 
 

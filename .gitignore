@@ -9,6 +9,8 @@ spark-warehouse/
 ## extra stuff ##
 src/deprecated/
 data/old/
+data/other/
+images/old/
 notebooks/
 
 ## specific files ##

@@ -4,7 +4,7 @@
 </p>
 Paxton Hyde
 
-Galvanize Data Science Immersive Capstone 2, February 2020
+Galvanize Data Science Immersive Capstone 2, March 2020
 
 ## Content
 - [Background](#background)
@@ -23,6 +23,10 @@ Furthermore, research does not suggest that place-based tax incentive programs a
 President Trump has recently claimed victory for the program even though it is under investigation by the Treasury Department.<sup>[4,](#footnote4)</sup><sup>[5](#footnote5)</sup> Congress also has not introduced regulation requiring data collection and reports on the effects of the program.<sup>[6](#footnote6)</sup>
 
 #### Opportunity Zone Designation Process
+
+<p align="center">
+  <img src="images/oz_flow.pdf" width = 800 height = 450>
+</p>
 
 State Governors nominate Census Tracts in their state as OZs, and the Secretary of the Treasury approves these selections. A tract is eligible if:
  
@@ -44,7 +48,7 @@ Based on the reporting of the misdesignation of OZs providing tax benefits to ce
 
 #### Feature Selection
 
-I gathered data for OZ tracts from the 2011-2015 ACS 5-year estimates using the Census Data API and the [`census`](https://pypi.org/project/census/) module off PyPi. I picked features using a "shotgun" method, keeping in mind that I need them to differentiate *suspect* from legitimate OZs. 
+I gathered data for OZ tracts from the 2012 and 2017 ACS 5-year estimates using the Census Data API and the [`census`](https://pypi.org/project/census/) module available on PyPi. 
 
 Gentrifying areas generally have:
 - an influx of people
@@ -52,7 +56,7 @@ Gentrifying areas generally have:
 - a young population 
 - a high percentage of renters and multi-unit housing
 - recent development, and 
-- increasing home values.
+- increasing incomes and home values.
 
 Based on this idea, the relative values of following features should increase our suspicion about an OZ designation.
 
@@ -213,5 +217,12 @@ A possible use of DBSCAN in a future iteration would be to look closer at the ou
 
 [Opportunity Zones Resources](https://www.cdfifund.gov/Pages/Opportunity-Zones.aspx): *CDFI Fund*
 
-[Distress Index source](https://www.brookings.edu/research/the-early-results-of-states-opportunity-zones-are-promising-but-theres-still-room-for-improvement/#footnote-1): *Brookings Institute*
+[Brookings Distress Index](https://www.brookings.edu/research/the-early-results-of-states-opportunity-zones-are-promising-but-theres-still-room-for-improvement/#footnote-1): *Brookings Institute*
+
+* by state:
+* poverty adjusted for student population
+* child poverty rate
+* educational attainment
+* income growth
+* change in poverty rate
 
