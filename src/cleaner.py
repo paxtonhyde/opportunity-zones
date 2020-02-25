@@ -1,7 +1,5 @@
-## fancyimpute requires TensorFlow
 import pandas as pd
 import numpy as np
-# from fancyimpute import KNN
 from sklearn.impute import KNNImputer
 from sklearn.preprocessing import StandardScaler
 from census_variables import delta_features, universe_to_column_mapping
@@ -19,7 +17,7 @@ def remove_bad_tracts(messy_df, useless_columns_if_zero):
     elif type(u) == list:
         empty_line_mask = step_one[u[0]] != 0
         for i in range(1, len(u)):
-            empty_line_mask = np.logical_or(empty_line_mask , step_one[u[i]] != 0)
+            empty_line_mask = np.logical_or(empty_line_mask, step_one[u[i]] != 0)
     else:
         raise TypeError('''"useless_columns_if_zero" must be type str or list.''')
     step_two = step_one[empty_line_mask]
@@ -90,28 +88,36 @@ if __name__ == "__main__":
     clean.drop(columns=['geoid'], inplace=True)
 
 # missing value imputation
-    print("Imputing features using KNN.")
+    print("Imputing missing values using KNN.")
     standard = StandardScaler()
     X = standard.fit_transform(clean.values)
     filled = KNNImputer(n_neighbors=3).fit_transform(X)
     imputed = pd.DataFrame(standard.inverse_transform(filled), columns=clean.columns)
+    imputed.to_pickle("{}/imputed.pkl".format(data))
 
 # featurize
     print("Making features.")
     featurized = make_percent_columns(imputed, universe_to_column_mapping, [2017])
     f = make_delta_columns(featurized, delta_features, [2017, 2012])
-    f.drop(columns=[c for c in f.columns if c.endswith("2012")], inplace=True)
+    f.drop(columns=[c for c in f.columns if c.endswith("2012")], inplace=True)  
+    f['geoid'] = geoids
+    f.to_pickle("{}/featurized.pkl".format(data))
 
-# adding brookings features
+# adding descriptive features
     brookings = pd.read_csv("{}/oz_acs_data_brookings.csv".format(data))
     brookings['geoid'] = brookings['geoid'].apply(lambda row: "0" + str(row) if len(str(row)) == 10 else str(row))
     brookings['LICadj'] = brookings['eligible'].apply(lambda row: 1 if row == "Contiguous" else 0)
     brookings['eligible'] = brookings['eligible'].apply(lambda row: 0 if row == "Not Eligible" else 1)
-    brookings['oz'] = brookings['picked']
-    brookings[['distress_index', 'z_score_distress_index']].to_pickle("{}/brookings_distress_idx.pkl".format(data))
 
-    f['geoid'] = geoids
-    final = f.merge(brookings[['geoid', 'oz', 'LICadj', 'eligible']], on='geoid')
+    ozs = pd.read_csv("{}/old/qozs.csv".format(data))
+    ozs.columns = ozs.iloc[3]
+    ozs = ozs[4:]
+    f['oz'] = f['geoid'].apply(lambda row: 1 if row in ozs['Census Tract Number'].values else 0)
+    final = f.merge(brookings[['geoid', 'LICadj', 'eligible']], on='geoid')
+
+# drop failed calculations
+    final.replace([np.inf, -np.inf], np.nan, inplace=True)
+    final.dropna(inplace=True)
 
 # writing
     file_out = "clean{}.pkl".format(file_suffix)
