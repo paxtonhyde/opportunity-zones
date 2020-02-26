@@ -4,7 +4,6 @@ import pandas as pd
 import numpy as np 
 from sklearn.cluster import KMeans, MeanShift, DBSCAN
 from sklearn.preprocessing import StandardScaler, MaxAbsScaler
-from geography import fips_to_state
 from clusterer import Clusterer
 
 import os
@@ -13,6 +12,12 @@ home_directory = os.path.split(this_directory)[0]
 data_directory = os.path.join(home_directory, "data")
 images_directory = os.path.join(home_directory, "images")
 
+from us import states
+import censusgeocode as cg
+
+def fips_to_state(fips_as_string):
+    return states.lookup(fips_as_string).name
+    
 def majority_states(clusterlabels, dataframe, n_states=5):
     '''Calculates majority state by cluster.
     Pandas DataFrame with a state column

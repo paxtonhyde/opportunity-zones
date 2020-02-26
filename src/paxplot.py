@@ -2,15 +2,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 plt.style.use('seaborn-ticks')
+plt.rcParams['font.size'] = 16
+sns.set_context(rc = {'patch.linewidth': 0.0})
+palette = sns.color_palette(palette='deep')
 
-def style():
-    import matplotlib.pyplot as plt 
-    import seaborn as sns
-    ## ---- styling
-    plt.style.use('seaborn-ticks')
-    sns.set_context(rc = {'patch.linewidth': 0.0})
-    palette = sns.color_palette(palette='deep')
-    return palette
+
 
 def centroid_plot(ax, features, centroid, kwargs={}):
     '''Plot weightings of each feature on the cluster. Set ax title outside.
@@ -21,7 +17,9 @@ def centroid_plot(ax, features, centroid, kwargs={}):
     '''
     y = np.arange(len(centroid))
     ax.barh(y, centroid, tick_label=features, **kwargs)
+    ax.set_yticklabels(features, )
     ax.set_xlim(np.min(centroid) - 0.3, np.max(centroid) + 0.7)
+
 
 def cluster_plots(clusters, features, sns_palette='deep'):
     '''Not tested for n_components > 8
@@ -38,8 +36,8 @@ def cluster_plots(clusters, features, sns_palette='deep'):
 
     i = 0
     for ax, c in zip(axes.flatten(), h):
-        centroid_plot(ax, features, c, kwargs={'color':palette.as_hex()[i%10], 'alpha':0.9})
-        ax.set_title("Cluster {}".format(i), fontsize=16)
+        centroid_plot(ax, features, c, kwargs={'color':palette.as_hex()[i],'alpha':0.9})
+        ax.set_title("Cluster {}".format(i), fontsize=18)
         if i%figshape[1] != 0:
             ax.set_yticklabels([])
             ax.set_yticks([])

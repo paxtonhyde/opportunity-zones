@@ -72,7 +72,21 @@ def make_delta_columns(dataframe, columns_no_year, years):
             delta.append(c + str(y))
             
         dataframe["change_{}".format(c)] = ( dataframe[delta[1]] - dataframe[delta[0]] ) / dataframe[delta[0]]
+        # don't drop columns for the sake of EDA
     return dataframe
+
+'''
+Helper functions for normalizing columns.
+'''
+def remove_minimum(dataframe, column):
+    minimum = np.min(dataframe[column])
+    dataframe[column] = dataframe[column].apply(lambda row: row - minimum)
+
+def set_floor(dataframe, column, floor):
+    dataframe[column] = dataframe[column].apply(lambda row: floor if row < floor else row)
+
+def set_cap(dataframe, column, cap):
+    dataframe[column] = dataframe[column].apply(lambda row: cap if row > cap else row)
 
 
 if __name__ == "__main__":
@@ -117,6 +131,13 @@ if __name__ == "__main__":
 # drop failed calculations
     final.replace([np.inf, -np.inf], np.nan, inplace=True)
     final.dropna(inplace=True)
+
+# trim outliers
+    remove_minimum(final, "structure_year_median2017")
+    set_floor(final, "percent_bachelorsplus2017", 0)
+    for c in final.columns:
+        if c.startswith("change"):
+                set_cap(final, c, 1)
 
 # writing
     file_out = "clean{}.pkl".format(file_suffix)
