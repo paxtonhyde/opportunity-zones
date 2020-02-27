@@ -23,7 +23,7 @@ if __name__ == "__main__":
     ## load file
     filename = 'clean.pkl'
     print("Loading {}...".format(filename))
-    clean = pd.read_pickle(f"{data}/{filename}")
+    clean = pd.read_pickle("{}/{}".format(data, filename))
 
     not_picked = clean[(clean['eligible'] == 1) & (clean['oz'] == 0)]
     picked = clean[clean['oz'] == 1]

@@ -14,8 +14,7 @@ class Clusterer():
     '''
 
     def __init__(self, estimator, **kwargs):
-        self.dbscan = False
-        self.name = estimator
+        self.name = estimator.lower()
 
         if kwargs:
             self.estimator = self._pick_estimator(estimator, kwargs)
@@ -33,20 +32,33 @@ class Clusterer():
             return AgglomerativeClustering(**kwargs)
             ## defaults : 
         elif a == 'dbscan':
-            self.dbscan = True
             return DBSCAN(**kwargs)
             ## defaults : 
         else:
             return KMeans(**kwargs)
             ## defaults :
 
+    def _map_labels_to_centers(self, X):
+        labels = self.attributes['labels_']
+        clusters = np.unique(labels)
+
+        centers = []
+        for c in clusters:
+            mask = (labels == c)
+            this_cluster = X[mask]
+            centers.append(np.mean(this_cluster, axis=0))
+
+        return centers
+
     def fit(self, X, kwargs={}):
         ''' .fit() will not standardize X
         '''
         self.estimator.fit(X, **kwargs)
         self.attributes = self.estimator.__dict__
-        if self.dbscan:
+        if self.name == 'dbscan':
             return self.attributes['core_sample_indices_']
+        elif self.name == 'agglomerative':
+            return _map_labels_to_centers(X)
         else:
             return self.attributes['cluster_centers_']
     
