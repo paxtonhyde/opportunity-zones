@@ -28,6 +28,8 @@ if __name__ == "__main__":
     not_picked = clean[(clean['eligible'] == 1) & (clean['oz'] == 0)]
     picked = clean[clean['oz'] == 1]
 
+    test_drop=["percent_tenure_owner2017", "percent_race_white2017"]
+    unwanted = drop_columns(picked, test_drop)
     nonfeatures = drop_columns(picked, drop_cols)
     features = picked.columns
 

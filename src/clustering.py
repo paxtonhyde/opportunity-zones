@@ -29,6 +29,9 @@ if __name__ == "__main__":
     picked = clean[clean['oz'] == 1]
 
     nonfeatures = drop_columns(picked, drop_cols)
+
+    test_drop=["percent_tenure_owner2017", "percent_race_white2017"]
+    unwanted = drop_columns(picked, test_drop)
     features = picked.columns
 
     ## standardize
@@ -38,7 +41,7 @@ if __name__ == "__main__":
 
     ## build model
     cluster_labels = pd.DataFrame()
-    for k in range(4, 10):
+    for k in range(3, 10):
         model = 'kmeans'
         pax = Clusterer(model, n_clusters=k)
         centers = pax.fit(X)
@@ -64,8 +67,7 @@ if __name__ == "__main__":
         ## make silhouette plot
         f, ax = plt.subplots(figsize=(7,7))
         silhouette_plot(ax, pax, X)
-        ax.legend()
-        f.tight_layout()
+        ax.legend(), f.tight_layout()
         plt.savefig("{}/kmeans/silok={}".format(images, k), dpi=120, transparent=True)
         print("Made silhouette plot.")
 
