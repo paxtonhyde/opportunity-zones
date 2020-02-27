@@ -58,7 +58,7 @@ class Clusterer():
         if self.name == 'dbscan':
             return self.attributes['core_sample_indices_']
         elif self.name == 'agglomerative':
-            return _map_labels_to_centers(X)
+            return self._map_labels_to_centers(X)
         else:
             return self.attributes['cluster_centers_']
     
