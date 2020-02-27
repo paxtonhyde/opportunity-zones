@@ -1,9 +1,8 @@
-import argparse
-from collections import defaultdict
 import pandas as pd 
 import numpy as np 
-from sklearn.cluster import KMeans, MeanShift, DBSCAN
+from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import silhouette_score
 from clusterer import Clusterer
 from nmf import drop_cols
 
@@ -46,7 +45,8 @@ if __name__ == "__main__":
         pax = Clusterer(model, n_clusters=k)
         centers = pax.fit(X)
         cluster_labels["k={}".format(k)] = pax.attributes['labels_']
-        print("{} grouped {} clusters.\n".format(model, np.shape(centers)[0]))
+        cluster_labels["k{}silhouette_score".format(k)] = silhouette_score(X, pax.attributes['labels_'])
+        print("{} grouped {} clusters.".format(model, np.shape(centers)[0]))
 
         ## map centroids back to descriptive features
         ## and plot
@@ -69,6 +69,6 @@ if __name__ == "__main__":
         silhouette_plot(ax, pax, X)
         ax.legend(), f.tight_layout()
         plt.savefig("{}/kmeans/silok={}".format(images, k), dpi=120, transparent=True)
-        print("Made silhouette plot.")
+        print("Made silhouette plot.\n")
 
     cluster_labels.to_pickle("{}/{}labels.pkl".format(data, model))
