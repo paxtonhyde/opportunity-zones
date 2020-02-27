@@ -5,17 +5,10 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import silhouette_samples
 from clusterer import Clusterer
 from nmf import drop_cols
+from clustering import drop_columns
 
 from directory import data, images
 
-def drop_columns(dataframe, columns):
-    dropped = dataframe[columns]
-    for c in columns:
-        try:
-            dataframe.drop(columns=[c], inplace=True)
-        except KeyError:
-            print("Couldn't drop column '{}' from features matrix.".format(c))
-    return dropped
 
 if __name__ == "__main__":
 

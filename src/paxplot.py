@@ -65,6 +65,33 @@ def silhouette_plot(ax1, clusterer, X):
     ax1.set_xticks(np.linspace(x_low, x_high, num=7))
 
 
+def pca_2comp_plot(ax, pca_object, data, show_centroid=True,\
+                   n_points=2000, scatter_kwargs={}, centroid_kwargs={}):
+    '''
+    Set title, savefig, tight_layout outside.
+    
+    '''
+    component_a = pca_object.components_[0]
+    component_b = pca_object.components_[1]
+    x = np.dot(data.values, component_a)[:n_points]
+    y = np.dot(data.values, component_b)[:n_points]
+    # key kwargs are color, alpha, label
+    ax.scatter(x, y, **scatter_kwargs)
+    
+    if show_centroid:
+        centroid = np.mean(data, axis=0)
+        pca_centroid = np.dot(pca_object.components_[:2], centroid)
+        
+        default_kwargs = {'s':100, 'color':"k", 'marker':'x', 'alpha':0.9, 'zorder':10000}
+        for key in centroid_kwargs:
+            default_kwargs[key] = centroid_kwargs[key]
+        ax.scatter(pca_centroid[0], pca_centroid[1], **default_kwargs)
+        
+    ax.legend(fontsize=16)
+    ax.set_xlabel("Principal Component 0", fontsize=16)
+    ax.set_ylabel("PC1", fontsize=16)
+
+
 def centroid_plot(ax, features, centroid, kwargs={}):
     '''Plot weightings of each feature on the cluster. Set ax title outside.
     Params:
