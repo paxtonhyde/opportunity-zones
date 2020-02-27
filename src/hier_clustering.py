@@ -44,7 +44,7 @@ if __name__ == "__main__":
         pax = Clusterer(model, n_clusters=k)
         centers = pax.fit(X)
         cluster_labels["k={}".format(k)] = pax.attributes['labels_']
-        print("{} grouped {} clusters.\n".format(model, np.shape(centers)[0]))
+        print("{} grouped {} clusters.".format(model, np.shape(centers)[0]))
 
         ## map centroids back to descriptive features
         ## and plot
