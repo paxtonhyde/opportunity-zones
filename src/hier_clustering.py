@@ -40,8 +40,8 @@ if __name__ == "__main__":
     cluster_labels = pd.DataFrame()
     for k in range(4, 10):
         model = 'agglomerative'
-        ## for linkage, affinity
-        pax = Clusterer(model, n_clusters=k)
+        linkage = "single"
+        pax = Clusterer(model, linkage=linkage, n_clusters=k)
         centers = pax.fit(X)
         cluster_labels["k={}".format(k)] = pax.attributes['labels_']
         print("{} grouped {} clusters.".format(model, np.shape(centers)[0]))
@@ -59,17 +59,18 @@ if __name__ == "__main__":
 
         ## make cluster plots
         cluster_plots(centers, features)
-        plt.savefig("{}/agglo/k={}.png".format(images, k), dpi=120, transparent=True)
+        plt.savefig("{}/agglosingle/k={}.png".format(images, k), dpi=120, transparent=True)
         print("Made cluster plots.")
 
         ## make silhouette plot
         f, ax = plt.subplots(figsize=(7,7))
         silhouette_plot(ax, pax, X)
         f.tight_layout()
-        plt.savefig("{}/agglo/silok={}".format(images, k), dpi=120, transparent=True)
+        ax.legend()
+        plt.savefig("{}/agglosingle/silok={}".format(images, k), dpi=120, transparent=True)
         print("Made silhouette plot.")
 
-    cluster_labels.to_pickle("{}/{}labels.pkl".format(data, model))
+    cluster_labels.to_pickle("{}/{}singlelabels.pkl".format(data, model))
 
     
 

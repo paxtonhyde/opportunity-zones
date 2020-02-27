@@ -64,6 +64,7 @@ if __name__ == "__main__":
         ## make silhouette plot
         f, ax = plt.subplots(figsize=(7,7))
         silhouette_plot(ax, pax, X)
+        ax.legend()
         f.tight_layout()
         plt.savefig("{}/kmeans/silok={}".format(images, k), dpi=120, transparent=True)
         print("Made silhouette plot.")
