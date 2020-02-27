@@ -3,134 +3,71 @@ from collections import defaultdict
 import pandas as pd 
 import numpy as np 
 from sklearn.cluster import KMeans, MeanShift, DBSCAN
-from sklearn.preprocessing import StandardScaler, MaxAbsScaler
+from sklearn.preprocessing import StandardScaler
 from clusterer import Clusterer
+from nmf import drop_cols
 
-import os
-this_directory = os.path.realpath(".")
-home_directory = os.path.split(this_directory)[0]
-data_directory = os.path.join(home_directory, "data")
-images_directory = os.path.join(home_directory, "images")
+from directory import data, images
 
-from us import states
-import censusgeocode as cg
-
-def fips_to_state(fips_as_string):
-    return states.lookup(fips_as_string).name
-    
-def majority_states(clusterlabels, dataframe, n_states=5):
-    '''Calculates majority state by cluster.
-    Pandas DataFrame with a state column
-    '''
-    info = defaultdict(list)
-    sort_value, aggr, n_states = 'state', 'count', 5
-    for c in np.unique(clusterlabels):
-        clus = dataframe[dataframe['cluster'] == c]
-        clus = clus.groupby(sort_value).agg({ sort_value:aggr })
-        column_name = sort_value + "_" + aggr
-        clus.columns = [sort_value + "_" + aggr]
-
-        n_most = clus.sort_values(by=column_name, ascending=False)[:n_states]
-        clus_size = np.sum(clus[column_name].values)
-
-        for i, j in zip(n_most.index.values, n_most.values.flatten()):
-            p = j/clus_size
-            info[c].append((fips_to_state(i), round(p, 2)))
-
-    return info
-
-def map_cores_to_centers(dbscan, X):
-    ''' Partially taken from the SKLearn website's DBSCAN demo.
-    '''
-    core_samples_mask = np.zeros_like(dbscan.labels_, dtype=bool)
-    core_samples_mask[dbscan.core_sample_indices_] = True
-
-    unique_labels_ = set(dbscan.labels_)
-    cluster_centers = []
-    for q in unique_labels_:
-        if q == -1: ## -1 label in DBSCAN means unclustered
-            continue
-        class_mask = (dbscan.labels_ == q)
-        cluster = X[core_samples_mask & class_mask] 
-        cluster_centers.append(np.mean(cluster, axis=0))
-    return cluster_centers
-
-if __name__ == "__main__":
-
-    ## load file
-    filename = 'qoz_model.pkl'
-    print("Loading {}...".format(filename))
-    dataframe = pd.read_pickle(f"{data_directory}/{filename}")
-    tract_ = dataframe['tract'].copy()
-    states_ = dataframe['state'].copy()
-
-    ## reorder columns
-    order = ['Non-LIC', 'household_income_median', 'outofcountyflux', 'p_white', 'p_multiple_unit_strucs',\
-        'home_value_median', 'structure_year_median', 'p_never_married', 'p_renting', 'vacancy',\
-            'population_total', 'p_black', 'age_median', 'poverty', 'p_mobilehomes', 'state', 'tract']
-    dataframe = dataframe[order]
-
-    ## drop non-features (Eventually integrate this feature into Clusterer class)
-    drop = 'state tract'
-    for c in drop.split():
+def drop_columns(dataframe, columns):
+    dropped = dataframe[columns]
+    for c in columns:
         try:
             dataframe.drop(columns=[c], inplace=True)
         except KeyError:
             print("Couldn't drop column '{}' from features matrix.".format(c))
+    return dropped
 
-    ## exclude LICs
-    exclude_LIC = False
-    if exclude_LIC:
-        dataframe = dataframe[dataframe['Non-LIC'] == 1]
+if __name__ == "__main__":
 
-    ## standardize data
+    ## load file
+    filename = 'clean.pkl'
+    print("Loading {}...".format(filename))
+    clean = pd.read_pickle(f"{data}/{filename}")
+
+    not_picked = clean[(clean['eligible'] == 1) & (clean['oz'] == 0)]
+    picked = clean[clean['oz'] == 1]
+
+    nonfeatures = drop_columns(picked, drop_cols)
+    features = picked.columns
+
+    ## standardize
     standardize = StandardScaler()
-    X, features = dataframe.values,\
-        dataframe.columns.values
+    X, features = picked.values, picked.columns.values
     X = standardize.fit_transform(X)
 
-    algorithms = ['MeanShift', 'KMeans', 'DBSCAN']
-    ## {eps:0.85, min_samples:5} = ~8
-    ## w/o LIC {eps:2, min_samples:3} = 3
-    n = 1
-    k = 3
+    ## drop unuseful features
+
     ## build model
-    pax = Clusterer(algorithms[n], drop, n_clusters=6, n_jobs=-1)
-    centers = pax.fit(X)
-    if algorithms[n] == 'DBSCAN':
-        centers = map_cores_to_centers(pax.estimator, X)
-    print("{} grouped {} clusters.\n".format(algorithms[n], np.shape(centers)[0]))
+    cluster_labels = pd.DataFrame()
+    for k in range(4, 10):
+        model = 'kmeans'
+        pax = Clusterer(model, n_clusters=k)
+        centers = pax.fit(X)
+        cluster_labels["k={}".format(k)] = pax.attributes['labels_']
+        print("{} grouped {} clusters.\n".format(model, np.shape(centers)[0]))
 
-    ## map centroids back to descriptive features
-    features = dataframe.columns
-    ## , and plot
-    from paxplot import style, cluster_plots
-    import matplotlib.pyplot as plt 
-    import seaborn as sns
-    ## ---- styling
-    plt.style.use('seaborn-ticks')
-    sns.set_context(rc = {'patch.linewidth': 0.0})
-    palette = sns.color_palette(palette='deep')
+        ## map centroids back to descriptive features
+        ## and plot
+        from paxplot import cluster_plots, silhouette_plot
+        import matplotlib.pyplot as plt 
+        import seaborn as sns
+        ## ---- styling
+        plt.style.use('seaborn-ticks')
+        plt.rcParams['font.size'] = 16
+        sns.set_context(rc = {'patch.linewidth': 0.0})
+        palette = sns.color_palette(palette='deep')
 
-    cluster_plots(centers, features)
-    plt.tight_layout()
-    #plt.savefig(f"{images_directory}/{algorithms[n]}_{'eps87m5'}.png", dpi=120)
-    plt.show()
+        ## make cluster plots
+        cluster_plots(centers, features)
+        plt.savefig("{}/agglo/k={}.png".format(images, k), dpi=120, transparent=True)
+        print("Made cluster plots.")
 
-    ## calculate majority state by cluster
+        ## make silhouette plot
+        f, ax = plt.subplots(figsize=(7,7))
+        silhouette_plot(ax, pax, X)
+        f.tight_layout()
+        plt.savefig("{}/agglo/silok={}".format(images, k), dpi=120, transparent=True)
+        print("Made silhouette plot.")
 
-    pax_labels = pax.attributes['labels_']
-    dataframe['cluster'] = pax_labels
-    dataframe['tract'] = tract_
-    dataframe['state'] = states_
-
-    states = majority_states(pax_labels, dataframe)
-    for k, v in states.items():
-        print("Cluster {} states -> {}".format(k, v))
-
-    # cluster2 = dataframe[dataframe['cluster'] == 2]
-    # cluster2.to_pickle(f"{images_directory}/MScluster2.pkl")
-
-    
-
-    
+    cluster_labels.to_pickle("{}/{}labels.pkl".format(data, model))

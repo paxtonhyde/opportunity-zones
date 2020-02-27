@@ -70,10 +70,3 @@ class Clusterer():
 if __name__ == "__main__":
     ##
     a = Clusterer('kmeans', 'state tract', n_clusters=11)
-    ##
-    b = Clusterer('kmeans', 'state tract')
-
-    ## Why use soft versus hard clustering
-    ## expand EDA
-    ## do NMF
-    ## start README

@@ -1,0 +1,27 @@
+from us import states
+import censusgeocode as cg
+def fips_to_state(fips_as_string):
+    return states.lookup(fips_as_string).name
+
+def majority_states(clusterlabels, dataframe, n_states=5):
+    '''Calculates majority state by cluster.
+    Pandas DataFrame with a state column
+    '''
+    info = defaultdict(list)
+    sort_value, aggr, n_states = 'state', 'count', 5
+    for c in np.unique(clusterlabels):
+        clus = dataframe[dataframe['cluster'] == c]
+        clus = clus.groupby(sort_value).agg({ sort_value:aggr })
+        column_name = sort_value + "_" + aggr
+        clus.columns = [sort_value + "_" + aggr]
+
+        n_most = clus.sort_values(by=column_name, ascending=False)[:n_states]
+        clus_size = np.sum(clus[column_name].values)
+
+        for i, j in zip(n_most.index.values, n_most.values.flatten()):
+            p = j/clus_size
+            info[c].append((fips_to_state(i), round(p, 2)))
+
+    return info
+
+    

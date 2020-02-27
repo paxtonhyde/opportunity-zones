@@ -6,8 +6,6 @@ plt.rcParams['font.size'] = 16
 sns.set_context(rc = {'patch.linewidth': 0.0})
 palette = sns.color_palette(palette='deep')
 
-
-
 def centroid_plot(ax, features, centroid, kwargs={}):
     '''Plot weightings of each feature on the cluster. Set ax title outside.
     Params:
