@@ -2,9 +2,64 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 plt.style.use('seaborn-ticks')
-plt.rcParams['font.size'] = 16
-sns.set_context(rc = {'patch.linewidth': 0.0})
+sns.set_context(rc = {'patch.linewidth': 0.0, 'font.size':16.0})
 palette = sns.color_palette(palette='deep')
+from directory import data, images
+
+from sklearn.cluster import KMeans, DBSCAN, MeanShift
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import silhouette_samples, silhouette_score
+
+def silhouette_plot(ax1, clusterer, X):
+    ## Loosely adapted from https://scikit-learn.org/stable/auto_examples/cluster/plot_kmeans_silhouette_analysis.html
+
+    labels_ = clusterer.attributes['labels_']
+    n_clusters = clusterer.attributes['n_clusters']
+
+    # The silhouette coefficient can range from [-1, 1]
+    x_low, x_high = -0.3, 0.8
+    ax1.set_xlim([x_low, x_high])
+    # The (n_clusters+1)*10 is for inserting blank space between silhouette
+    # plots of individual clusters, to demarcate them clearly.
+    ax1.set_ylim([0, len(X) + (n_clusters + 1) * 10])
+
+    silhouette_avg = silhouette_score(X, labels_)
+    sample_silhouette_values = silhouette_samples(X, labels_)
+
+    y_lower = 10
+    for i in range(n_clusters):
+        # Aggregate the silhouette scores for samples belonging to
+        # cluster i, and sort them
+        ith_cluster_silhouette_values = \
+            sample_silhouette_values[labels_ == i]
+
+        ith_cluster_silhouette_values.sort()
+
+        size_cluster_i = ith_cluster_silhouette_values.shape[0]
+        y_upper = y_lower + size_cluster_i
+
+        color = palette.as_hex()[i%10]
+        ax1.fill_betweenx(np.arange(y_lower, y_upper),
+                        0, ith_cluster_silhouette_values,
+                        facecolor=color, edgecolor=color, alpha=0.7)
+
+        # Label the silhouette plots with their cluster numbers at the middle
+        ax1.text(-0.05, y_lower + 0.5 * size_cluster_i, str(i))
+
+        # Compute the new y_lower for next plot
+        y_lower = y_upper + 10  # 10 for the 0 samples
+
+    ax1.set_title("{} (k={})".format(clusterer.name, n_clusters), fontsize=18)
+    ax1.set_xlabel("Silhouette coefficient")
+    ax1.set_ylabel("Cluster")
+
+    # The vertical line for average silhouette score of all the values
+    ax1.axvline(x=silhouette_avg, color="k", linestyle="--", alpha = 0.7,
+        label="mean silhouette score: {:.3f}".format(silhouette_avg))
+
+    ax1.set_yticks([])  # Clear the y-axis
+    ax1.set_xticks(np.linspace(x_low, x_high, num=7))
+
 
 def centroid_plot(ax, features, centroid, kwargs={}):
     '''Plot weightings of each feature on the cluster. Set ax title outside.

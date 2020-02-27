@@ -36,8 +36,6 @@ if __name__ == "__main__":
     X, features = picked.values, picked.columns.values
     X = standardize.fit_transform(X)
 
-    ## drop unuseful features
-
     ## build model
     cluster_labels = pd.DataFrame()
     for k in range(4, 10):
@@ -56,7 +54,7 @@ if __name__ == "__main__":
         ## ---- styling
         plt.style.use('seaborn-ticks')
         plt.rcParams['font.size'] = 16
-        sns.set_context(rc = {'patch.linewidth': 0.0})
+        sns.set_context(rc = {'patch.linewidth': 0.0, 'font.size':16.0})
         palette = sns.color_palette(palette='deep')
 
         ## make cluster plots

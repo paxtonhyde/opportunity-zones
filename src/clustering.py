@@ -36,8 +36,6 @@ if __name__ == "__main__":
     X, features = picked.values, picked.columns.values
     X = standardize.fit_transform(X)
 
-    ## drop unuseful features
-
     ## build model
     cluster_labels = pd.DataFrame()
     for k in range(4, 10):
@@ -55,19 +53,19 @@ if __name__ == "__main__":
         ## ---- styling
         plt.style.use('seaborn-ticks')
         plt.rcParams['font.size'] = 16
-        sns.set_context(rc = {'patch.linewidth': 0.0})
+        sns.set_context(rc = {'patch.linewidth': 0.0, 'font.size':16.0})
         palette = sns.color_palette(palette='deep')
 
         ## make cluster plots
         cluster_plots(centers, features)
-        plt.savefig("{}/agglo/k={}.png".format(images, k), dpi=120, transparent=True)
+        plt.savefig("{}/kmeans/k={}.png".format(images, k), dpi=120, transparent=True)
         print("Made cluster plots.")
 
         ## make silhouette plot
         f, ax = plt.subplots(figsize=(7,7))
         silhouette_plot(ax, pax, X)
         f.tight_layout()
-        plt.savefig("{}/agglo/silok={}".format(images, k), dpi=120, transparent=True)
+        plt.savefig("{}/kmeans/silok={}".format(images, k), dpi=120, transparent=True)
         print("Made silhouette plot.")
 
     cluster_labels.to_pickle("{}/{}labels.pkl".format(data, model))

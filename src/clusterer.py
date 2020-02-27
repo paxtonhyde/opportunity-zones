@@ -1,9 +1,8 @@
 import argparse
 import pandas as pd 
 import numpy as np 
-from sklearn.cluster import KMeans, MeanShift, DBSCAN
+from sklearn.cluster import KMeans, MeanShift, DBSCAN, AgglomerativeClustering
 from sklearn.preprocessing import StandardScaler, MaxAbsScaler
-from geography import fips_to_state
 
 import os
 this_directory = os.path.realpath(".")
@@ -14,9 +13,9 @@ class Clusterer():
     '''
     '''
 
-    def __init__(self, estimator, drop, **kwargs):
-        self.drop = drop
+    def __init__(self, estimator, **kwargs):
         self.dbscan = False
+        self.name = estimator
 
         if kwargs:
             self.estimator = self._pick_estimator(estimator, kwargs)
@@ -27,18 +26,18 @@ class Clusterer():
 
     def _pick_estimator(self, algo_name, kwargs={}):
         '''
-        Picks MeanShift by default.
+        Picks KMeans by default.
         '''
         a = algo_name.strip().lower()
-        if a == 'kmeans':
-            return KMeans(**kwargs)
+        if a == 'agglomerative':
+            return AgglomerativeClustering(**kwargs)
             ## defaults : 
         elif a == 'dbscan':
             self.dbscan = True
             return DBSCAN(**kwargs)
             ## defaults : 
         else:
-            return MeanShift(**kwargs)
+            return KMeans(**kwargs)
             ## defaults :
 
     def fit(self, X, kwargs={}):
@@ -66,7 +65,3 @@ class Clusterer():
 
     def fit_predict(self, X):
         pass
-
-if __name__ == "__main__":
-    ##
-    a = Clusterer('kmeans', 'state tract', n_clusters=11)
