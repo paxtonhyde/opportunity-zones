@@ -16,7 +16,7 @@ import scipy.stats as sstats
 import statsmodels.stats.weightstats as wstats
 
 drop_cols = ['population_total2017', 'household_income_median2017',
-    'home_value_median2017', 'housing_units_total2017', 'geoid', 'oz', 'LICadj', 'eligible']
+    'home_value_median2017', 'housing_units_total2017', 'geoid', 'oz', 'LICadj', 'eligible', 'percent_tenure_owner2017']
 
 if __name__ == "__main__":
     clean = pd.read_pickle("{}/clean.pkl".format(data))

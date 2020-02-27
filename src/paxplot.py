@@ -10,6 +10,10 @@ from sklearn.cluster import KMeans, DBSCAN, MeanShift
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import silhouette_samples, silhouette_score
 
+feature_labels = ['age', 'Δ home value', 'Δ household income', 'Δ housing units', 'Δ population', '% bachelorsplus',\
+ '% enrolled', '% housing units mobile', '% occupancy vacant', '% poverty ', '% race black', '% race white',\
+ '% single unit housing', 'structure year']
+
 def silhouette_plot(ax1, clusterer, X):
     ## Loosely adapted from https://scikit-learn.org/stable/auto_examples/cluster/plot_kmeans_silhouette_analysis.html
 

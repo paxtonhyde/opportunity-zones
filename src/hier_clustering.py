@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np 
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import silhouette_score
+from sklearn.metrics import silhouette_samples
 from clusterer import Clusterer
 from nmf import drop_cols
 
@@ -27,8 +27,6 @@ if __name__ == "__main__":
     not_picked = clean[(clean['eligible'] == 1) & (clean['oz'] == 0)]
     picked = clean[clean['oz'] == 1]
 
-    test_drop=["percent_tenure_owner2017", "percent_race_white2017"]
-    unwanted = drop_columns(picked, test_drop)
     nonfeatures = drop_columns(picked, drop_cols)
     features = picked.columns
 
@@ -45,7 +43,7 @@ if __name__ == "__main__":
         pax = Clusterer(model, linkage=linkage, n_clusters=k)
         centers = pax.fit(X)
         cluster_labels["k={}".format(k)] = pax.attributes['labels_']
-        cluster_labels["k{}silhouette_score".format(k)] = silhouette_score(X, pax.attributes['labels_'])
+        cluster_labels["k{}silhouette_score".format(k)] = silhouette_samples(X, pax.attributes['labels_'])
         print("{} grouped {} clusters.".format(model, np.shape(centers)[0]))
 
         ## map centroids back to descriptive features
@@ -61,7 +59,8 @@ if __name__ == "__main__":
 
         ## make cluster plots
         cluster_plots(centers, features)
-        plt.savefig("{}/agglo/k={}.png".format(images, k), dpi=120, transparent=True)
+        imagepath = "{}/agglo"
+        plt.savefig("{}/k={}.png".format(imagepath, k), dpi=120, transparent=True)
         print("Made cluster plots.")
 
         ## make silhouette plot
@@ -69,8 +68,8 @@ if __name__ == "__main__":
         silhouette_plot(ax, pax, X)
         f.tight_layout()
         ax.legend()
-        plt.savefig("{}/agglo/silok={}".format(images, k), dpi=120, transparent=True)
-        print("Made silhouette plot.\n")
+        plt.savefig("{}/silok={}".format(imagepath, k), dpi=120, transparent=True)
+        print("Made silhouette plot.-->{}\n".format(imagepath))
 
     cluster_labels.to_pickle("{}/{}labels.pkl".format(data, model))
 

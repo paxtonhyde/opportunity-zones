@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np 
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import silhouette_score
+from sklearn.metrics import silhouette_samples
 from clusterer import Clusterer
 from nmf import drop_cols
 
@@ -29,8 +29,6 @@ if __name__ == "__main__":
 
     nonfeatures = drop_columns(picked, drop_cols)
 
-    test_drop=["percent_tenure_owner2017", "percent_race_white2017"]
-    unwanted = drop_columns(picked, test_drop)
     features = picked.columns
 
     ## standardize
@@ -45,7 +43,7 @@ if __name__ == "__main__":
         pax = Clusterer(model, n_clusters=k)
         centers = pax.fit(X)
         cluster_labels["k={}".format(k)] = pax.attributes['labels_']
-        cluster_labels["k{}silhouette_score".format(k)] = silhouette_score(X, pax.attributes['labels_'])
+        cluster_labels["k{}silhouette_score".format(k)] = silhouette_samples(X, pax.attributes['labels_'])
         print("{} grouped {} clusters.".format(model, np.shape(centers)[0]))
 
         ## map centroids back to descriptive features
