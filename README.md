@@ -23,9 +23,10 @@ Furthermore, research does not suggest that place-based tax incentive programs a
 President Trump has recently claimed victory for the program even though it is under investigation by the Treasury Department.<sup>[4,](#footnote4)</sup><sup>[5](#footnote5)</sup> Congress also has not introduced regulation requiring data collection and reports on the effects of the program.<sup>[6](#footnote6)</sup>
 
 #### Opportunity Zone Designation Process
-
 <p align="center">
-  <img src="images/oz_flow.pdf" width = 800 height = 450>
+  <object data="images/oz_flow.pdf" type="application/pdf" width="800px" height="450px">
+      <embed src="images/oz_flow.pdf"></embed>
+  </object>
 </p>
 
 State Governors nominate Census Tracts in their state as OZs, and the Secretary of the Treasury approves these selections. A tract is eligible if:
