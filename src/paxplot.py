@@ -16,6 +16,7 @@ def generate_feature_labels(columns):
         c = c.rstrip("2017").replace("total", "").replace("median", "")
         c = c.replace("change", u"Δ").replace("percent", "%").replace("_", " ")
         c = c.replace("tenure", "").replace("occupancy", "").replace("race", "")
+        c = c.replace("owner", "homeowner").replace("enrolled", "students")
         new_columns.append(c)
     return new_columns
 
@@ -129,9 +130,10 @@ def cluster_plots(clusters, features, sns_palette='deep'):
         ax.set_title("Cluster {}".format(i), fontsize=20)
         if i%figshape[1] != 0:
             ax.set_yticklabels([])
-            ax.set_yticks([])
+            #ax.set_yticks([])
+        ax.grid(axis="y")
         i+=1
-        
+    
     fig.tight_layout()
     
 

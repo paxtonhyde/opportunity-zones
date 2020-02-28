@@ -4,6 +4,7 @@ from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import silhouette_samples
 from clusterer import Clusterer
+import argparse
 
 from directory import data, images
 
@@ -21,6 +22,11 @@ def drop_columns(dataframe, columns):
     return dropped
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-p', '--plot', action='store_true',\
+                        help='Update cluster and silhouette plots in images/<clusterer>')
+    args = vars(parser.parse_args())
+    do_plots = args['plot']
 
     ## load file
     filename = 'clean.pkl'
@@ -40,9 +46,9 @@ if __name__ == "__main__":
 
     ## build model
     cluster_labels = pd.DataFrame()
-    for k in range(4, 8):
+    for k in range(3, 10):
         model = 'kmeans'
-        pax = Clusterer(model, n_clusters=k)
+        pax = Clusterer(model, n_clusters=k, random_state=24)
         centers = pax.fit(X)
         cluster_labels["k={}".format(k)] = pax.attributes['labels_']
         cluster_labels["k{}silhouette_score".format(k)] = silhouette_samples(X, pax.attributes['labels_'])
@@ -60,16 +66,17 @@ if __name__ == "__main__":
         palette = sns.color_palette(palette='deep')
         feature_labels = generate_feature_labels(features)
 
-        ## make cluster plots
-        cluster_plots(centers, feature_labels)
-        plt.savefig("{}/kmeans/k={}.png".format(images, k), dpi=120, transparent=True)
-        print("Made cluster plots.")
+        if do_plots:
+            ## make cluster plots
+            cluster_plots(centers, feature_labels)
+            plt.savefig("{}/kmeans/k={}.png".format(images, k), dpi=120, transparent=True)
+            print("Made cluster plots.")
 
-        ## make silhouette plot
-        f, ax = plt.subplots(figsize=(7,7))
-        silhouette_plot(ax, pax, X)
-        ax.legend(), f.tight_layout()
-        plt.savefig("{}/kmeans/silok={}".format(images, k), dpi=120, transparent=True)
-        print("Made silhouette plot.\n")
+            ## make silhouette plot
+            f, ax = plt.subplots(figsize=(7,7))
+            silhouette_plot(ax, pax, X)
+            ax.legend(), f.tight_layout()
+            plt.savefig("{}/kmeans/silok={}".format(images, k), dpi=120, transparent=True)
+            print("Made silhouette plot.\n")
 
-    cluster_labels.to_pickle("{}/{}labels.pkl".format(data, model))
+            cluster_labels.to_pickle("{}/{}labels.pkl".format(data, model))
