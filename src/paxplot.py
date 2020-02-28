@@ -10,9 +10,14 @@ from sklearn.cluster import KMeans, DBSCAN, MeanShift
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import silhouette_samples, silhouette_score
 
-feature_labels = ['age', 'Δ home value', 'Δ household income', 'Δ housing units', 'Δ population', '% bachelorsplus',\
- '% enrolled', '% housing units mobile', '% occupancy vacant', '% poverty ', '% race black', '% race white',\
- '% single unit housing', 'structure year']
+def generate_feature_labels(columns):
+    new_columns = []
+    for c in columns:
+        c = c.rstrip("2017").replace("total", "").replace("median", "")
+        c = c.replace("change", u"Δ").replace("percent", "%").replace("_", " ")
+        c = c.replace("tenure", "").replace("occupancy", "").replace("race", "")
+        new_columns.append(c)
+    return new_columns
 
 def silhouette_plot(ax1, clusterer, X):
     ## Loosely adapted from https://scikit-learn.org/stable/auto_examples/cluster/plot_kmeans_silhouette_analysis.html
@@ -53,7 +58,7 @@ def silhouette_plot(ax1, clusterer, X):
         # Compute the new y_lower for next plot
         y_lower = y_upper + 10  # 10 for the 0 samples
 
-    ax1.set_title("{} (k={})".format(clusterer.name, n_clusters), fontsize=18)
+    ax1.set_title("{} (k={})".format(clusterer.name, n_clusters), fontsize=24)
     ax1.set_xlabel("Silhouette coefficient")
     ax1.set_ylabel("Cluster")
 
@@ -82,14 +87,14 @@ def pca_2comp_plot(ax, pca_object, data, show_centroid=True,\
         centroid = np.mean(data, axis=0)
         pca_centroid = np.dot(pca_object.components_[:2], centroid)
         
-        default_kwargs = {'s':100, 'color':"k", 'marker':'x', 'alpha':0.9, 'zorder':10000}
+        default_kwargs = {'s':100, 'color':'k', 'marker':'x', 'alpha':0.9, 'zorder':10000}
         for key in centroid_kwargs:
             default_kwargs[key] = centroid_kwargs[key]
         ax.scatter(pca_centroid[0], pca_centroid[1], **default_kwargs)
         
-    ax.legend(fontsize=16)
-    ax.set_xlabel("Principal Component 0", fontsize=16)
-    ax.set_ylabel("PC1", fontsize=16)
+    ax.legend(fontsize=20)
+    ax.set_xlabel("Principal Component 0", fontsize=18)
+    ax.set_ylabel("Principal Component 1", fontsize=18)
 
 
 def centroid_plot(ax, features, centroid, kwargs={}):
@@ -101,7 +106,7 @@ def centroid_plot(ax, features, centroid, kwargs={}):
     '''
     y = np.arange(len(centroid))
     ax.barh(y, centroid, tick_label=features, **kwargs)
-    ax.set_yticklabels(features, )
+    ax.set_yticklabels(features, fontsize=18)
     ax.set_xlim(np.min(centroid) - 0.3, np.max(centroid) + 0.7)
 
 
@@ -121,7 +126,7 @@ def cluster_plots(clusters, features, sns_palette='deep'):
     i = 0
     for ax, c in zip(axes.flatten(), h):
         centroid_plot(ax, features, c, kwargs={'color':palette.as_hex()[i],'alpha':0.9})
-        ax.set_title("Cluster {}".format(i), fontsize=18)
+        ax.set_title("Cluster {}".format(i), fontsize=20)
         if i%figshape[1] != 0:
             ax.set_yticklabels([])
             ax.set_yticks([])
@@ -163,7 +168,7 @@ def scree_plot(ax, pca, n_components_to_plot=8, title=None, cumsum=False):
     ax.set_xticks(ind)
     ax.set_xticklabels(ind + 1, fontsize=12)
     ax.set_ylim(0, max(vals) + 0.05)
-    ax.set_xlabel("Principal Component", fontsize=12)
-    ax.set_ylabel("{}Variance Explained".format(y_label), fontsize=12)
+    ax.set_xlabel("Principal Component", fontsize=18)
+    ax.set_ylabel("{}Variance Explained".format(y_label), fontsize=18)
     if title is not None:
-        ax.set_title(title, fontsize=16)
+        ax.set_title(title, fontsize=18)

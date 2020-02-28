@@ -15,10 +15,10 @@ import scipy.stats as sstats
 import statsmodels.stats.weightstats as wstats
 
 drop_cols = ['population_total2017', 'household_income_median2017',\
-    'home_value_median2017', 'housing_units_total2017', 'age_median2017', 'geoid', 'oz', \
+    'home_value_median2017', 'housing_units_total2017', 'geoid', 'oz', \
     'LICadj', 'eligible']
 
-# Need to copy from notebook
+# Need to copy stuff over from notebook
 if __name__ == "__main__":
     clean = pd.read_pickle("{}/clean.pkl".format(data))
     not_picked = clean[(clean['eligible'] == 1) and (clean['oz'] == 0)]

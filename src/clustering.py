@@ -4,9 +4,12 @@ from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import silhouette_samples
 from clusterer import Clusterer
-from nmf import drop_cols
 
 from directory import data, images
+
+drop_cols = ['percent_tenure_owner2017', 'age_median2017', 'population_total2017',\
+     'household_income_median2017','home_value_median2017', 'housing_units_total2017', 'geoid',\
+     'oz', 'LICadj', 'eligible']
 
 def drop_columns(dataframe, columns):
     dropped = dataframe[columns]
@@ -28,7 +31,6 @@ if __name__ == "__main__":
     picked = clean[clean['oz'] == 1]
 
     nonfeatures = drop_columns(picked, drop_cols)
-
     features = picked.columns
 
     ## standardize
@@ -38,7 +40,7 @@ if __name__ == "__main__":
 
     ## build model
     cluster_labels = pd.DataFrame()
-    for k in range(3, 10):
+    for k in range(4, 8):
         model = 'kmeans'
         pax = Clusterer(model, n_clusters=k)
         centers = pax.fit(X)
@@ -48,7 +50,7 @@ if __name__ == "__main__":
 
         ## map centroids back to descriptive features
         ## and plot
-        from paxplot import cluster_plots, silhouette_plot
+        from paxplot import cluster_plots, silhouette_plot, generate_feature_labels
         import matplotlib.pyplot as plt 
         import seaborn as sns
         ## ---- styling
@@ -56,9 +58,10 @@ if __name__ == "__main__":
         plt.rcParams['font.size'] = 16
         sns.set_context(rc = {'patch.linewidth': 0.0, 'font.size':16.0})
         palette = sns.color_palette(palette='deep')
+        feature_labels = generate_feature_labels(features)
 
         ## make cluster plots
-        cluster_plots(centers, features)
+        cluster_plots(centers, feature_labels)
         plt.savefig("{}/kmeans/k={}.png".format(images, k), dpi=120, transparent=True)
         print("Made cluster plots.")
 
