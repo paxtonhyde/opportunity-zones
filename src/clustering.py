@@ -1,11 +1,12 @@
+import argparse
+import pickle
 import pandas as pd 
 import numpy as np 
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import silhouette_samples
+from paxplot import generate_feature_labels
 from clusterer import Clusterer
-import argparse
-
 from directory import data, images
 
 drop_cols = ['percent_tenure_owner2017', 'age_median2017', 'population_total2017',\
@@ -29,6 +30,7 @@ if __name__ == "__main__":
     do_plots = args['plot']
 
     ## load file
+    model = 'kmeans'
     filename = 'clean.pkl'
     print("Loading {}...".format(filename))
     clean = pd.read_pickle(f"{data}/{filename}")
@@ -46,37 +48,42 @@ if __name__ == "__main__":
 
     ## build model
     cluster_labels = pd.DataFrame()
-    for k in range(3, 10):
-        model = 'kmeans'
+    for k in range(6, 7):
         pax = Clusterer(model, n_clusters=k, random_state=24)
         centers = pax.fit(X)
-        cluster_labels["k={}".format(k)] = pax.attributes['labels_']
-        cluster_labels["k{}silhouette_score".format(k)] = silhouette_samples(X, pax.attributes['labels_'])
+        pax.store_features(features)
         print("{} grouped {} clusters.".format(model, np.shape(centers)[0]))
 
-        ## map centroids back to descriptive features
-        ## and plot
-        from paxplot import cluster_plots, silhouette_plot, generate_feature_labels
-        import matplotlib.pyplot as plt 
-        import seaborn as sns
-        ## ---- styling
-        plt.style.use('seaborn-ticks')
-        plt.rcParams['font.size'] = 16
-        sns.set_context(rc = {'patch.linewidth': 0.0, 'font.size':16.0})
-        palette = sns.color_palette(palette='deep')
-        feature_labels = generate_feature_labels(features)
+
+        ## update labels and scores for column k
+        filepath = "{}/{}/labels.pkl".format(data, model)
+        with open(filepath, "rb") as f:
+            k = pax.attributes['n_clusters']
+            model_labels_df = pickle.load(f)
+            model_labels_df["k={}".format(k)] = pax.attributes['labels_']
+            model_labels_df["k{}silho_score".format(k)] = pax.get_silhouette_samples()
+        model_labels_df.to_pickle(filepath)
+        print("Updated labels @ {}".format(filepath))
+
+        ### !
+        filepath = "{}/{}/estimator.pkl".format(data, model)
+        with open(filepath, "wb") as c:
+            pickle.dump(pax, c)
+            print("Clusterer object @ {}".format(filepath))
 
         if do_plots:
-            ## make cluster plots
-            cluster_plots(centers, feature_labels)
-            plt.savefig("{}/kmeans/k={}.png".format(images, k), dpi=120, transparent=True)
-            print("Made cluster plots.")
+            with open("{}/{}/estimator.pkl".format(data, model), "rb") as c:
+                clusterer = pickle.load(c)
 
-            ## make silhouette plot
-            f, ax = plt.subplots(figsize=(7,7))
-            silhouette_plot(ax, pax, X)
-            ax.legend(), f.tight_layout()
-            plt.savefig("{}/kmeans/silok={}".format(images, k), dpi=120, transparent=True)
-            print("Made silhouette plot.\n")
+            ## map centroids back to features and plot
+            import matplotlib.pyplot as plt 
+            import seaborn as sns
+            ## ---- styling
+            plt.style.use('seaborn-ticks')
+            plt.rcParams['font.size'] = 16
+            sns.set_context(rc = {'patch.linewidth': 0.0, 'font.size':16.0})
+            palette = sns.color_palette(palette='deep')
 
-            cluster_labels.to_pickle("{}/{}labels.pkl".format(data, model))
+
+            plots_dir = "{}/{}".format(images, clusterer.name)
+            clusterer.plot_clusters_from_object(plots_dir)

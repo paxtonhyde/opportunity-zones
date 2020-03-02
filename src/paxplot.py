@@ -14,17 +14,19 @@ def generate_feature_labels(columns):
     new_columns = []
     for c in columns:
         c = c.rstrip("2017").replace("total", "").replace("median", "")
-        c = c.replace("change", u"Δ").replace("percent", "%").replace("_", " ")
+        c = c.replace("percent", "%").replace("_", " ")
         c = c.replace("tenure", "").replace("occupancy", "").replace("race", "")
-        c = c.replace("owner", "homeowner").replace("enrolled", "students")
+        c = c.replace("housing units mobile", "mobilehomes")
+        c = c.replace("owner", "homeowner").replace("enrolled", "students").replace("year", "year built")
         new_columns.append(c)
     return new_columns
 
-def silhouette_plot(ax1, clusterer, X):
+def silhouette_plot(ax1, clusterer):
     ## Loosely adapted from https://scikit-learn.org/stable/auto_examples/cluster/plot_kmeans_silhouette_analysis.html
 
     labels_ = clusterer.attributes['labels_']
     n_clusters = clusterer.attributes['n_clusters']
+    X, _ = clusterer.get_data()
 
     # The silhouette coefficient can range from [-1, 1]
     x_low, x_high = -0.3, 0.8
@@ -34,7 +36,7 @@ def silhouette_plot(ax1, clusterer, X):
     ax1.set_ylim([0, len(X) + (n_clusters + 1) * 10])
 
     silhouette_avg = silhouette_score(X, labels_)
-    sample_silhouette_values = silhouette_samples(X, labels_)
+    sample_silhouette_values = clusterer.get_silhouette_samples()
 
     y_lower = 10
     for i in range(n_clusters):
@@ -121,7 +123,7 @@ def cluster_plots(clusters, features, sns_palette='deep'):
     else:
         figshape = (1, n_comp)
 
-    fig, axes = plt.subplots(figshape[0], figshape[1], figsize=(20, 10))
+    fig, axes = plt.subplots(figshape[0], figshape[1], figsize=(16, 10))
     palette = sns.color_palette(palette=sns_palette)
 
     i = 0
