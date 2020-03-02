@@ -11,8 +11,8 @@ src/deprecated/
 data/old/
 data/other/
 images/old/
+images/agglo
 notebooks/
 
 ## specific files ##
-notes_README.md
 geo.txt

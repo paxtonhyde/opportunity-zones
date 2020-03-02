@@ -3,7 +3,7 @@ import numpy as np
 import seaborn as sns
 plt.style.use('seaborn-ticks')
 sns.set_context(rc = {'patch.linewidth': 0.0, 'font.size':16.0})
-palette = sns.color_palette(palette='deep')
+palette = sns.color_palette(palette='deep').as_hex()
 from directory import data, images
 
 from sklearn.cluster import KMeans, DBSCAN, MeanShift
@@ -11,6 +11,9 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import silhouette_samples, silhouette_score
 
 def generate_feature_labels(columns):
+    '''
+    Parameters –––
+    '''
     new_columns = []
     for c in columns:
         c = c.rstrip("2017").replace("total", "").replace("median", "")
@@ -21,9 +24,27 @@ def generate_feature_labels(columns):
         new_columns.append(c)
     return new_columns
 
-def silhouette_plot(ax1, clusterer):
-    ## Loosely adapted from https://scikit-learn.org/stable/auto_examples/cluster/plot_kmeans_silhouette_analysis.html
+def percentage_plot(ax, features, centroid, kwargs={}):
+    '''Plot percent change of each feature on the cluster. Set ax title outside.
+    
+        ax: Matplotlib ax object to plot on
+        features: array of strings (n,)
+        centroid: array of weightings (n,)
+    '''
+    y = np.arange(len(centroid))
+    ax.barh(y, centroid, tick_label=features, **kwargs)
+    ax.set_yticklabels(features, fontsize=18)
+    xmin, xmax = np.min(centroid) - 0.0115, np.max(centroid) + 0.058
+    xtks = np.arange(xmin, xmax, .02)
+    ax.set_xlim(xmin, xmax)
+    ax.set_xticks(xtks)
+    ax.set_xticklabels(["{:.1f}%".format(i*100) for i in xtks])
 
+
+def silhouette_plot(ax1, clusterer):
+    '''
+    Loosely adapted from https://scikit-learn.org/stable/auto_examples/cluster/plot_kmeans_silhouette_analysis.html
+    '''
     labels_ = clusterer.attributes['labels_']
     n_clusters = clusterer.attributes['n_clusters']
     X, _ = clusterer.get_data()
@@ -115,7 +136,6 @@ def centroid_plot(ax, features, centroid, kwargs={}):
 
 def cluster_plots(clusters, features, sns_palette='deep'):
     '''Not tested for n_components > 8
-        *Look at figsize, 
     '''
     n_comp, h = np.shape(clusters)[0], clusters
     if n_comp > 4:
@@ -137,7 +157,28 @@ def cluster_plots(clusters, features, sns_palette='deep'):
         i+=1
     
     fig.tight_layout()
-    
+
+def cluster_proportion_plot(ax, cluster_count_groupby, sns_palette="deep"):
+    '''
+    Draws stacked barplot of counts in cluster_count_groupby as proportion of the sum of all counts.
+    Call .tight_layout() outside.
+
+    Parameters –––
+    ax: matplotlib.axis object (recommended figsize=(20, 2))
+    cluster_count_groupby: pandas dataframe, grouped by cluster and aggregated by count
+    '''
+    palette = sns.color_palette(palette=sns_palette).as_hex()
+    groups = cluster_count_groupby
+    groups['proportion'] = groups.iloc[:, 0] / np.sum(groups.iloc[:, 0])
+
+    bottom = 0
+    for i, p in enumerate(groups['proportion']):
+        ax.barh(1, p, height = 0.2, left=bottom, color=palette[i])
+        ax.annotate('{:.0f}%'.format(p*100), (bottom + (p/2), 0.95),\
+                xycoords='data', color="white", fontsize=22)
+        ax.set_xticks([]), ax.set_yticks([]), ax.axis("off")
+        ax.set_title("Cluster proportions", loc='left', fontsize = 24)
+        bottom += p
 
 def scree_plot(ax, pca, n_components_to_plot=8, title=None, cumsum=False):
     """Scree plot showing the variance (default) or cumulative variance explained
@@ -159,8 +200,8 @@ def scree_plot(ax, pca, n_components_to_plot=8, title=None, cumsum=False):
         
     num_components = pca.n_components_
     ind = np.arange(num_components)
-    ax.plot(ind, vals, color='blue')
-    ax.scatter(ind, vals, color='blue', s=50)
+    ax.plot(ind, vals, color=palette[0])
+    ax.scatter(ind, vals, color=palette[0], s=50)
 
     for i in range(num_components):
         ax.annotate(r"{:2.0f}%".format(vals[i]*100), 
@@ -175,4 +216,4 @@ def scree_plot(ax, pca, n_components_to_plot=8, title=None, cumsum=False):
     ax.set_xlabel("Principal Component", fontsize=18)
     ax.set_ylabel("{}Variance Explained".format(y_label), fontsize=18)
     if title is not None:
-        ax.set_title(title, fontsize=18)
+        ax.set_title(title, fontsize=22)

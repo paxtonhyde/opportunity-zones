@@ -17,6 +17,8 @@ palette = sns.color_palette(palette='deep')
 
 class Clusterer():
     '''
+    Wrapper for sklearn clustering algorithms also stores fitted data, feature names,
+    calculates cluster centers and silhouette scores, and plots cluster centroids.
     '''
 
     def __init__(self, estimator, **kwargs):
@@ -29,8 +31,6 @@ class Clusterer():
             self.estimator = self._pick_estimator(estimator)
         self.attributes = self.estimator.__dict__
         print("Using: {}".format(self.estimator))
-
-    # __getattr__?
 
     def _pick_estimator(self, algo_name, kwargs={}):
         '''
@@ -49,7 +49,7 @@ class Clusterer():
 
     def _map_labels_to_centers(self):
         '''
-        Helper for making centroids from agglomerative clustering.
+        Helper for making centroids from aglorithms that do not return cluster centers.
         '''
         labels = self.attributes['labels_']
         clusters = np.unique(labels)
@@ -63,7 +63,12 @@ class Clusterer():
         return centers
 
     def fit(self, X, kwargs={}):
-        ''' .fit() will not standardize X
+        '''
+        Like sk-learn's .fit()
+
+        Parameters ––––
+        X: numpy.ndarray of shape (observations, features)
+        kwargs: dictionary for sk-learn .fit() kwargs
         '''
         self.estimator.fit(X, **kwargs)
         self.is_fit = True
@@ -74,12 +79,19 @@ class Clusterer():
             ## ? This isn't useful
             return self.attributes['core_sample_indices_']
 
-        elif self.name == 'agglomerative':
+        if self.name == 'agglomerative':
             self.attributes['cluster_centers_'] = self._map_labels_to_centers()
 
         return self.attributes['cluster_centers_']
 
     def fit_predict(self, X, kwargs={}):
+        '''
+        Like sk-learn's .fit_predict()
+
+        Parameters ––––
+        X: numpy.ndarray of shape (observations, features)
+        kwargs: dictionary for sk-learn .fit() kwargs
+        '''
         pass
 
     ## ––– Can't call these if unfitted
@@ -96,21 +108,42 @@ class Clusterer():
         pass
 
     def store_features(self, feature_names):
+        '''
+        Register feature labels for plotting.
+
+        Parameters ––––
+        feature_names: list of shape (features, )
+        '''
         if np.shape(self.X)[1] != len(feature_names):
             print("Dimensions of fitted X and feature_names do not match.")
             return
         self.feature_names = feature_names
 
     def get_silhouette_samples(self):
+        '''
+        Returns silhouette scores for each observation in self.X, shape (observations, )
+        '''
         return silhouette_samples(self.X, self.attributes['labels_'])
 
     def get_data(self):
+        '''
+        Return fitted data, shape (features, observations)
+        '''
         return self.X, self.feature_names
 
     def get_centroids(self):
+        '''
+        Returns the centroid (mean feature values) of each fitted cluster, shape (n_clusters, features)
+        '''
         return self.attributes['cluster_centers_']
 
     def plot_clusters_from_object(self, directory_for_plots):
+        '''
+        Saves cluster plots and silhouette plot to filepath directory_for_plots
+
+        Parameters –––
+        directory_for_plots: filepath where to put plots (string)
+        '''
         
         ## get params
         feature_labels = generate_feature_labels(self.feature_names)
