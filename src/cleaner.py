@@ -6,6 +6,7 @@ from census_variables import delta_features, universe_to_column_mapping
 from directory import data
 
 def remove_bad_tracts(messy_df, useless_columns_if_zero):
+    ''' '''
     # 1 : tracts where the API returned nothing
     a = (messy_df.drop(columns=['geoid']) != -1)
     step_one = messy_df[a.all(axis=1)]
@@ -36,7 +37,7 @@ def remove_bad_tracts(messy_df, useless_columns_if_zero):
 
 def make_percent_columns(dataframe, universe_to_column_mapping, years):
     '''
-    Should be called before make_delta_columns()
+    Make this one more clear
     '''
     m = universe_to_column_mapping
     for y in years:
@@ -65,6 +66,7 @@ def make_percent_columns(dataframe, universe_to_column_mapping, years):
 
 
 def make_delta_columns(dataframe, columns_no_year, years):
+    ''' '''
     for c in columns_no_year:    
         delta = []
 
@@ -72,7 +74,6 @@ def make_delta_columns(dataframe, columns_no_year, years):
             delta.append(c + str(y))
             
         dataframe["change_{}".format(c)] = ( dataframe[delta[1]] - dataframe[delta[0]] ) / dataframe[delta[0]]
-        # don't drop columns for the sake of EDA
     return dataframe
 
 '''
@@ -106,7 +107,7 @@ if __name__ == "__main__":
     X = standard.fit_transform(clean.values)
     filled = KNNImputer(n_neighbors=3).fit_transform(X)
     imputed = pd.DataFrame(standard.inverse_transform(filled), columns=clean.columns)
-    imputed.to_pickle("{}/imputed.pkl".format(data))
+    # imputed.to_pickle("{}/imputed.pkl".format(data))
 
 # featurize
     print("Making features.")
@@ -114,7 +115,7 @@ if __name__ == "__main__":
     f = make_delta_columns(featurized, delta_features, [2017, 2012])
     f.drop(columns=[c for c in f.columns if c.endswith("2012")], inplace=True)  
     f['geoid'] = geoids
-    f.to_pickle("{}/featurized.pkl".format(data))
+    # f.to_pickle("{}/featurized.pkl".format(data))
 
 # adding descriptive features
     brookings = pd.read_csv("{}/oz_acs_data_brookings.csv".format(data))

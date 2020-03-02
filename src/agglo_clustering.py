@@ -4,7 +4,6 @@ import pandas as pd
 import numpy as np 
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.preprocessing import StandardScaler
-
 from sklearn.metrics import silhouette_samples
 from paxplot import generate_feature_labels
 from clusterer import Clusterer
@@ -38,26 +37,33 @@ if __name__ == "__main__":
 
     ## build model
     cluster_labels = pd.DataFrame()
-    for k in range(4, 10):
-        pax = Clusterer(model, linkage=linkage, n_clusters=k)
+    for k in range(6, 7):
+        pax = Clusterer(model, n_clusters=k, linkage=linkage, random_state=24)
         centers = pax.fit(X)
-        feature_labels = generate_feature_labels(features)
-        pax.store_features(feature_labels)
-
-        ## What I need to do here is update the labels .pkl for column k 
-        # cluster_labels["k={}".format(k)] = pax.attributes['labels_']
-        # cluster_labels["k{}silhouette_score".format(k)] = silhouette_samples(X, pax.attributes['labels_'])
-        # cluster_labels.to_pickle("{}/{}/labels.pkl".format(data, model))
-
+        pax.store_features(features)
         print("{} grouped {} clusters.".format(model, np.shape(centers)[0]))
 
+        ## update labels and scores for column k
+        filepath = "{}/{}/labels.pkl".format(data, model)
+        with open(filepath, "rb") as f:
+            k = pax.attributes['n_clusters']
+            model_labels_df = pickle.load(f)
+            model_labels_df["k={}".format(k)] = pax.attributes['labels_']
+            model_labels_df["k{}silho_score".format(k)] = pax.get_silhouette_samples()
+        model_labels_df.to_pickle(filepath)
+        print("Updated labels @ {}".format(filepath))
+
         ### !
-        with open("{}/{}/estimator.pkl".format(data, model), "wb") as c:
+        filepath = "{}/{}/estimator.pkl".format(data, model)
+        with open(filepath, "wb") as c:
             pickle.dump(pax, c)
+            print("Clusterer object @ {}".format(filepath))
 
         if do_plots:
+            with open("{}/{}/estimator.pkl".format(data, model), "rb") as c:
+                clusterer = pickle.load(c)
+
             ## map centroids back to features and plot
-            from paxplot import cluster_plots, silhouette_plot
             import matplotlib.pyplot as plt 
             import seaborn as sns
             ## ---- styling
@@ -66,17 +72,8 @@ if __name__ == "__main__":
             sns.set_context(rc = {'patch.linewidth': 0.0, 'font.size':16.0})
             palette = sns.color_palette(palette='deep')
 
-            ## make cluster plots
-            cluster_plots(centers, feature_labels)
-            plt.savefig("{}/kmeans/k={}.png".format(images, k), dpi=120, transparent=True)
-            print("Made cluster plots.")
-
-            ## make silhouette plot
-            f, ax = plt.subplots(figsize=(7,7))
-            silhouette_plot(ax, pax)
-            ax.legend(), f.tight_layout()
-            plt.savefig("{}/kmeans/silok={}".format(images, k), dpi=120, transparent=True)
-            print("Made silhouette plot.\n")
+            plots_dir = "{}/{}".format(images, clusterer.name)
+            clusterer.plot_clusters_from_object(plots_dir)
 
     
 

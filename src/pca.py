@@ -33,6 +33,7 @@ if __name__ == "__main__":
     suspect = pd.read_pickle("{}/suspect_tracts.pkl".format(data_dir))
     drop_columns(suspect, drop_cols)
 
+## filter data
     X_all = clean[clean['eligible'] == 1]
     X_notpicked = X_all[X_all['oz'] == 0]
     X_picked = X_all[X_all['oz'] == 1].reset_index(drop=True)
@@ -42,13 +43,14 @@ if __name__ == "__main__":
     features= X_notpicked.columns
     feature_labels = generate_feature_labels(features)
 
+## crunch PCA
     std_scaler = StandardScaler()
     std_X = std_scaler.fit_transform(X_all)
     n = 9 # explains ~90% of variance
     paxPCA = PCA(n_components=n)
     pca_all = paxPCA.fit(std_X)
 
-    ## scree plot
+## Scree plots
     f, axes = plt.subplots(2, 1, figsize=(12, 8))
     scree_plot(axes.flatten()[0], pca_all, n_components_to_plot=n, title="Explained variance, all eligible tracts")
     scree_plot(axes.flatten()[1], pca_all, n_components_to_plot=n,\
@@ -56,7 +58,7 @@ if __name__ == "__main__":
     f.tight_layout()
     # plt.savefig("{}/pca_scree_{}.png".format(labels[i]), dpi=120, transparent=True)
 
-    ## Plot first two components of picked and not picked to see no separation
+## Plot first two components of picked and not picked to see no separation
     fig, ax = plt.subplots(figsize=(15, 12))
     data_labels = ["Other eligible tracts", "Designated OZs"]
     data = data[:2]
@@ -73,7 +75,7 @@ if __name__ == "__main__":
     ax.set_title("No separation between picked and unpicked tracts", fontsize=24)
     # plt.savefig("{}/pca_noseparation.png".format(images), dpi=120, transparent=True)
 
-    ## Plot PCA clusters
+## Plot PCA clusters
     n_clusters = 6
     k_labels = labels['k={}'.format(n_clusters)]
     cluster_masks = []
@@ -102,7 +104,8 @@ if __name__ == "__main__":
     ax.set_title("KMeans clusters", fontsize=24)
     # plt.savefig("{}/pca_clusters.png".format(images), dpi=120, transparent=True)
 
-    ## plot significant differences between picked and nonpicked
+
+## plot significant differences between picked and nonpicked
         ## calculate significant differences
     pdiff = percent_differences(X_picked.values, X_all.values)
     diffs = pdiff[:,0]

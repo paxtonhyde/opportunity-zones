@@ -6,13 +6,16 @@ sns.set_context(rc = {'patch.linewidth': 0.0, 'font.size':16.0})
 palette = sns.color_palette(palette='deep').as_hex()
 from directory import data, images
 
-from sklearn.cluster import KMeans, DBSCAN, MeanShift
+from sklearn.cluster import KMeans, DBSCAN, AgglomerativeClustering
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import silhouette_samples, silhouette_score
 
 def generate_feature_labels(columns):
     '''
+    Reformats feature labels for interpretabilty and beauty on plots.
+
     Parameters –––
+    columns: list of column names to be reformatted.
     '''
     new_columns = []
     for c in columns:
@@ -25,11 +28,15 @@ def generate_feature_labels(columns):
     return new_columns
 
 def percentage_plot(ax, features, centroid, kwargs={}):
-    '''Plot percent change of each feature on the cluster. Set ax title outside.
-    
-        ax: Matplotlib ax object to plot on
-        features: array of strings (n,)
-        centroid: array of weightings (n,)
+    '''
+    Plot percent change of each feature on the cluster, colored if the difference is z-significant.
+    Set ax title outside.
+
+    Parameters –––  
+    ax: Matplotlib ax object to plot on
+    features: list of strings
+    centroid: list of cluster feature means (numbers)
+    kwargs: keyword arguments for ax.barh (dict)
     '''
     y = np.arange(len(centroid))
     ax.barh(y, centroid, tick_label=features, **kwargs)
