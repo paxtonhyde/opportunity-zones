@@ -1,6 +1,6 @@
 # What's in an Opportunity Zone?
 <p align="center">
-  <img src="images/old/houston_1.jpg" alt="source: New York Times" width=900>
+  <img src="images/houston_1.jpg" alt="source: New York Times" width=900>
 </p>
 Paxton Hyde
 
@@ -24,7 +24,7 @@ President Trump has recently claimed victory for the program even though it is u
 
 #### Opportunity Zone Designation Process
 <p align="center">
-      <img src="images/oz_flow.png">
+      <img src="images/oz_designation.png">
 </p>
 
 State Governors nominate Census Tracts in their state as OZs, and the Secretary of the Treasury approves these selections. A tract is eligible if:
@@ -161,27 +161,14 @@ Although the accuracy of this plot is not a great look, it does tell us two inte
 
 2. Cluster 1 and 2, which we think represent more urban areas, are small because their archetype is not well-defined by the features. Other clusters actually accomodate those tracts which do not fit the urban archetype as well.
 
-#### DBCAN
-The DBSCAN algorithm searches for areas of density based on a distance parameter and a minimum number of samples forming a core area. 
+## Mapping the clusters
 
-I found that this clusterer tended to find similar groups multiple times. It is essentially looking for pockets of homogeneity. Clusters 2, 3, 5, and 7 are almost identical, with the rest being very similar except with more mobile homes and varying household income. The homogeneity is also represented in the majority states for each cluster, which tend to be places without dynamic cities that we would expect to have tracts of interest.
-
-A possible use of DBSCAN in a future iteration would be to look closer at the outliers it produces.
-
-<p align="center">
-  <img src="images/old/DBSCAN_eps87m5.png" width=850>
-  <img src="images/old/screencaps/DBSCAN.png" width=700>
-</p>
 
 ## Next Steps
 
-1. Refeaturize based on my outline in the NMF section and reading how other researchers have evaluated Opportunity Zones
+1. ***
 
-2. Test a cosine distance metric in clustering to account for different costs of living across states
-
-3. Use a stacked clustering model to find outlier clusters (by clustering on clusters), or more fine-grained clusters (by clustering within clusters)
-
-4. Use the word "cluster" another 100,000 times
+2. ***
 
 [Back to top](#content)
 
@@ -215,13 +202,3 @@ A possible use of DBSCAN in a future iteration would be to look closer at the ou
 - [QOZ designation procedures (6 CFR 601.601: Rules and regulations)](https://www.irs.gov/pub/irs-drop/rp-18-16.pdf): *Internal Revenue Code*
 
 [Opportunity Zones Resources](https://www.cdfifund.gov/Pages/Opportunity-Zones.aspx): *CDFI Fund*
-
-[Brookings Distress Index](https://www.brookings.edu/research/the-early-results-of-states-opportunity-zones-are-promising-but-theres-still-room-for-improvement/#footnote-1): *Brookings Institute*
-
-* by state:
-* poverty adjusted for student population
-* child poverty rate
-* educational attainment
-* income growth
-* change in poverty rate
-

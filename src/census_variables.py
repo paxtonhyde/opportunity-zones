@@ -33,11 +33,3 @@ universe_to_column_mapping = {"population_total":["race_white", "race_black", "p
 
 delta_features = ['population_total', 'household_income_median', 'home_value_median', 'housing_units_total']
 
-us_averages = {'household_income_median': 63179, 
-        'age_median': 38.2,
-        'p_poverty': 0.118,
-        'p_black': 0.127,
-        'p_white' : 0.730,
-        'home_value_median': 217600,
-        'p_vacancy': 0.0315}
-

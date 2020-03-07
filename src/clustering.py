@@ -61,7 +61,7 @@ if __name__ == "__main__":
             k = pax.attributes['n_clusters']
             model_labels_df = pickle.load(f)
             model_labels_df["k={}".format(k)] = pax.attributes['labels_']
-            model_labels_df["k{}silho_score".format(k)] = pax.get_silhouette_samples()
+            model_labels_df["k{}silhouette_score".format(k)] = pax.get_silhouette_samples()
         model_labels_df.to_pickle(filepath)
         print("Updated labels @ {}".format(filepath))
 
