@@ -107,7 +107,6 @@ if __name__ == "__main__":
     X = standard.fit_transform(clean.values)
     filled = KNNImputer(n_neighbors=3).fit_transform(X)
     imputed = pd.DataFrame(standard.inverse_transform(filled), columns=clean.columns)
-    # imputed.to_pickle("{}/imputed.pkl".format(data))
 
 # featurize
     print("Making features.")
@@ -115,7 +114,6 @@ if __name__ == "__main__":
     f = make_delta_columns(featurized, delta_features, [2017, 2012])
     f.drop(columns=[c for c in f.columns if c.endswith("2012")], inplace=True)  
     f['geoid'] = geoids
-    # f.to_pickle("{}/featurized.pkl".format(data))
 
 # adding descriptive features
     brookings = pd.read_csv("{}/oz_acs_data_brookings.csv".format(data))
