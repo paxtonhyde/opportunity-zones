@@ -4,23 +4,24 @@
 </p>
 Paxton Hyde
 
-Galvanize Data Science Immersive Capstone 2, March 2020
-
 ## Content
 - [Background](#background)
+- [Objectives](#objectives)
 - [Data](#data)
-- [Topic modeling with NMF](#NMF)
-- [Hard clustering](#clustering)
-- [Future work](#nextsteps)
+- [Clustering](#clustering)
+- [Denver map](#mappingtheclusters)
+- [Conclusions](#conclusions)
 - [References](#references)
 
 ## Background
 
-The Tax Cuts and Jobs Act of 2017 introduced an Opportunity Zone (OZ) program that allows capital gains tax deferrals and other benefits for investments in designated census tracts. The purpose of the program is to encourage investment in struggling communities. The idea is that the tax benefits will offset extra costs and risks associated with developing in neglected areas with smaller markets. News reporting critiques the program over its liberal designation process, which risks make the tax benefits a giveaway to wealthy investors who would have developed in any case.<sup>[1](#footnote1)</sup> The Economist notes, for example, that a tract in downtown Portland, Maine that hosts 200 thousand tourists annually was designated as an OZ.<sup>[2](#footnote2)</sup>
+The U.S. Tax Cuts and Jobs Act of 2017 introduced the Opportunity Zone (OZ) program to encourage investment in struggling communities. The program allows capital gains tax write-downs for investments in business or real estate in designated Census tracts. (A Census tract is a geographic subdivision of the country used for statistical purposes averaging about 4000 residents.) These tax benefits are provided to offset additional costs and risks associated with developing in neglected or weak markets. 
 
-Furthermore, research does not suggest that place-based tax incentive programs are particularly effective. It seems that any new jobs created simply replace old jobs that already existed or are taken by high-skilled workers who move in from elsewhere.<sup>[3](#footnote3)</sup>
+News reporting on OZs tends to be skeptical of the program, because it appears to be a tax giveaway to wealthy investors who would have developed anyways.<sup>[1](#footnote1)</sup> For example, the *Economist* weekly notes that the Old Port neighborhood in downtown Portland, ME was designated as an OZ despite its success as a tourist destination.<sup>[2](#footnote2)</sup> This sort of evidence suggests that the designation criteria are too lax.
 
-President Trump has recently claimed victory for the program even though it is under investigation by the Treasury Department.<sup>[4,](#footnote4)</sup><sup>[5](#footnote5)</sup> Congress also has not introduced regulation requiring data collection and reports on the effects of the program.<sup>[6](#footnote6)</sup>
+Furthermore, research on similar place-based tax incentives shows that they have little if any effect on the economic well-being of an area's residence. The new jobs created usually either replace jobs that already existed or are taken by high-skilled workers who move in and gentrify the area.<sup>[3](#footnote3)</sup>
+
+President Trump has recently proclaimed the OZ program a success, even though it is under investigation by the Treasury Department.<sup>[4](#footnote4)</sup><sup>[,5](#footnote5)</sup> Congress also has not introduced regulation requiring data collection and reports on the effects of the program.<sup>[6](#footnote6)</sup>
 
 #### Opportunity Zone Designation Process
 <p align="center">
@@ -29,146 +30,195 @@ President Trump has recently claimed victory for the program even though it is u
 
 State Governors nominate Census Tracts in their state as OZs, and the Secretary of the Treasury approves these selections. A tract is eligible if:
  
-- it meets the requirements of a *low-income community* (LIC), meaning that it has a 20% poverty rate and has a median family income is no more than 80% of the revelant surrounding area;<sup>[7](#footnote7)</sup> or  
+* it meets the requirements of a *low-income community* (LIC), meaning that it has a 20% poverty rate and has a median family income is no more than 80% of the revelant surrounding area;<sup>[7](#footnote7)</sup>, or  
  
-- it is adjacent to an LIC and has a median household income of no more than 125% of that tract. 
+* it is adjacent to an LIC and has a median household income of no more than 125% of that tract. 
 
-Governors may nominate up to one-quarter of the LIC tracts in their state, or up to 25 if their state has less than 100 LICs. In addition, they may nominate a number of LIC-adjacent tracts up to five percent of the total tracts in the state. Designations may be based on data from 2011-2015 or more recent American Community Survey (ACS) 5-year estimates.<sup>[8](#footnote8)</sup>
+Governors may nominate up to one-quarter of the LIC tracts in their state, or up to 25 if their state has less than 100 LICs. In addition, they may nominate a number of LIC-adjacent tracts up to five percent of the total tracts in the state. Designations may be based on data from 2011-2015 or more recent American Community Survey (ACS) 5-year estimates.<sup>[8](#footnote8)</sup> (Seeing as the ACS is released every year, the original designations were already based on outdated information.)
 
-#### This Study's Method
+Note that governors play a crucial role because they have local knowledge about which areas actually need the incentives. They can also exploit the process to grant favors.
 
-Based on the reporting of the misdesignation of OZs providing tax benefits to certain tracts which are already gentrifying or seem undeserving for other reasons, the goals of this project are to:
+## Objectives
 
-1. use topic modeling / soft clustering to identify archetypes or categories of the OZ tracts that seem *suspect* and undeserving of tax relief, and
+Given the skeptical hypothesis that many OZs are misdesignated, the goals of this project are to:
 
-2. use hard clustering to find tracts that represent the categories that we think should not be receiving tax relief. We will be able to say that these tracts were misdesignated.
+1. Collect Census data through the API
+
+2. Compare designated OZs with tracts that were eligible but not picked
+
+3. Identify zones whose OZ status should be revoked with clustering, and
+
+4. Determine new designation criteria
 
 ## Data
 
-#### Feature Selection
+I gathered tract-level data from the 2012 and 2017 ACS 5-year estimates using the Census Data API and the [`census`](https://pypi.org/project/census/) querying module (open-source from PyPi).
 
-I gathered data for OZ tracts from the 2012 and 2017 ACS 5-year estimates using the Census Data API and the [`census`](https://pypi.org/project/census/) module available on PyPi. 
+This amounted to ~73,000 tracts for the entire country, of which ~40,000 (57%) were eligible for OZ benefits and 7,710 (13%) were designated as OZs. That a majority of tracts were eligible 
 
-Gentrifying areas generally have:
-- an influx of people
-- significant racial mixture
-- a young population 
-- a high percentage of renters and multi-unit housing
-- recent development, and 
-- increasing incomes and home values.
+#### Feature Selection and Engineering
 
-Based on this idea, the relative values of following features should increase our suspicion about an OZ designation.
+I engineered features that would describe the economic and demographic characteristics of each tract. 
 
-| +   | - |
-|-------|--------|
-| % of residents who have never been married |      median age of residents|
-| % white population  |     % black population |
-| median household income and home value  |    poverty rate |
-| % of housing with multiple units | % of housing which are mobile homes |
-| % residents moving in from another county in the past year | housing vacancy rate |
-| median year of building construction | |
-| LIC-adjacent community | *(low income community)* |
+Economic development is represented by:
+- increase in housing units, or more recent average construction year
+- increasing population
+- increasing home value and income
+- decreasing poverty, and
+- low vacancy
+
+Demographics are represented by:
+- racial composition
+- homeownership
+- educational attainment and current students
+- proportion of single unit homes and mobile homes gives partial insight into whether the area is urban, suburban, and rural. (Single unit housing was strongly correlated with the homeownership and by extension, an older population.)
+
+Note: I represented household income and home value as a percent change between 2012 and 2017 rather than an absolute value as to avoid comparison based on an area's cost of living. I did the same for population and number of housing units to represent changing demand in an area. To make the standardization effective, I capped the percent change features at 100% and removed the minimum value for the median building construction year.
+
+<p align="center">
+  <img src="images/collinearity.png" width = 450 height = 450>
+</p>
+
+The correlation matrix shows that homeownership is strongly correlated with more single unit housing, so I excluded that feature.
+
+I did not want to exclude % white or black (other races serve as the third category), or bachelor's degree, or % poverty for the sake of keeping enough information.
 
 #### EDA
 
-863 of 8,761 (~10%) designated Opportunity Zones are in Puerto Rico, which makes sense given that the island's median income is about a third of the at-large United States median. Given this, I knew to be wary of Puerto Rico forming its own topics or clusters.
+Comparing all tracts eligible for OZ benefits with designated OZs, there were few *z-*significant differences in my chosen features.
 
 <p align="center">
-  <img src="images/old/ozs_by_states.png" width = 700 height = 450>
+  <img src="images/feature_comparison.png" width = 700 height = 450>
 </p>
 
+OZs have significantly less single unit housing and homeowners, suggesting that tend to be urban. This might be because governors were concentrating their development efforts in cities rather than rural areas with smaller markets. Otherwise, it might be because poverty is somewhat negatively correlated with single unit housing and homeownership (see above).
 
-We can get a sense of the "normal" values for our shotgun features by looking at their distributions. OZs are generally younger (~35), less white (~55%), and have a higher vacancy rate than the rest of the country. "Out of county flux" is the percent of residents who moved from another county in the past year, which is ~8% for OZs.
+OZs also tend to have a greater minority population, which could be because *(a)* the same reason as above and urban areas tend to be less white, *(b)* minorities are more likely to be impoverished, or *(c)* (cynical) governors perceive minorities communities as less economically developed whether they are or not.
 
-Note that the designation of OZs is not suspect because the tracts differ from the general population. Rather, they would be suspect because they have a particular combination of features. For example, a tract which was young because it is in the middle of the city or has many young families should be differentiated from a tract which is young because it is mostly students.
+A principal component plot shows no clear separation between the groups. (Each principal component represents a linear combination of all the features. This plot does not show all the variance, it is a simple visualization tool.)
 
 <p align="center">
-<img src="images/old/demography/age_median_dist.png" width=400><img src="images/demography/p_white_dist.png" width=400>
-<img src="images/old/demography/vacancy_dist.png" width=400><img src="images/demography/outofcountyflux_dist.png" width=400>
+  <img src="images/pca_noseparation.png" width = 700 height = 700>
 </p>
 
-## NMF
+The "suspicious" tracts that are marked here were identified in the news reporting I mentioned in the introduction. These include:
 
-The first goal of the project is to describe the archetypes of designated Opportunity Zones. Because I am essentially looking for outliers in the data, I knew I would need to sift through some other archetypes before I found a type with a suspect combination of features. The idea behind using soft clustering is that it would make sense that a neighborhood could be categorized in multiple ways. (LoHi, for example, is often a mix of very new apartments and older single family houses.)
+* Old Port in Portland, ME, which is a gentrifying tourist area
 
-These plots of the non-negative matrix factorization (NMF) components for each component (group, in other words) show how much each feature effects the likelihood of a particular observation (an OZ tract, in this case) being in a particular cluster.
+* the Warehouse District in NOLA, which is another gentrifying area
 
-<p align="center">
-  <img src="images/old/nmf_clusters_6.png" width=850>
-</p>
+* Market Square Park in Houston, which is the site of several new luxury developments
 
-Cluster 0 looks more like the U.S. average than a low-income community, given that it has higher weights of % white, household income, and age. Lightly suspicious.
+* Northwood Gardens in W. Palm Beach, home to Rybovich superyacht marina and nearby other much poorer neighborhoods which were undesignated, and
 
-Cluster 1 looks like a developed urban area or university campus.
+* College Park, MD, which is home to the University of Maryland
 
-Cluster 2 looks like what some might call an "inner-city" (read: poor black neighborhood) archetype.
+## Clustering
 
-Cluster 3 is almost too sparse to interpret, but could be a tract is recently developed.
+#### NMF
 
-Cluster 4 looks almost like a university campus.
-
-Cluster 5 loads heavily on not being a *low-income community*, and has some other features that we would expect to accompany that type.
+I hoped using non-negative matrix factorization (NMF) would show the appropriate number of clusters to explain variance within designated OZs. There was no clear "elbow" in the reconstruction error plot however.
 
 <p align="center">
   <img src="images/old/nmf_error.png" width=400>
 </p>
 
-There was no clear elbow in the reconstruction error, so I wanted to see what the "optimum" number of clusters looks like. At this level, the clusters have lost interpretability because they are grouped on just one or two features.
+Instead, I decided to judge the success of my clustering algorithm on the interpretability of the clusters.
+
+These plots of the NMF components for each cluster (group, in other words) show how much each feature affects the likelihood of a particular observation (an OZ tract, in this case) being in a particular cluster.
 
 <p align="center">
-  <img src="images/old/nmf_clusters_14.png" width=850>
+  <img src="images/nmf/NMF6.png" width=850>
 </p>
 
-Based on this NMF, it looks like I will have to re-featurize for my next capstone:
+I found six clusters to be fairly interpretable:
 
-* The year a structure is built weighed on most of the categories in my six-component sample. This makes sense given that the difference between 1940 and 1970 on a unit scale is both small, and the absolute value is always large when scaled by the largest value for the feature. 
+Cluster 0 looks more like the U.S. average than a low-income community, given that it has higher weights of % white, household income, and age. Lightly suspicious.
 
-* Whether a tract is a *low-income community* or adjacent to one is the only categorical feature, and so weighed very heavily on one cluster at the expense of other features.
+Cluster 1 looks like a developed urban area or university campus.
 
-* It could simplify my model to eliminate features that we would suspect to be indirectly related, such as median age and % never married, vacancy and out-of-county influx, multiple-unit structures and % mobile homes, and maybe home value and household income.
+Cluster 2 looks like a poorer, urban, black neighborhood archetype.
 
-* Population is a not very useful feature given that tracts vary in area. Maybe state-level population density could substitute until I find densities on a tract level.
+Cluster 3 is almost too sparse to interpret, but could be a tract is recently developed.
 
-* Add noncollinear demographic information, such as educational attainment.
+Cluster 4 looks like a university campus.
 
-## Clustering
+Cluster 5 loads heavily on *not* being a *low-income community*, and has some other features that we would expect to accompany that type.
 
-I found a KMeans clusterer to produce the most interpretable archetypes, as I was seeing with NMF.
-<p align="center">
-  <img src="images/old/KMeans_6.png" width=850>
-  <img src="images/old/screencaps/KM_k6.png" width=800>
-</p>
-Cluster 0 is more towards generic America, although may be skewed by the fact that California, New York, and Massachusetts have higher costs of living. Cluster 4 is heavily weighted on not being a LIC, although given that the weightings of household income and whiteness are large on an absolute scale, it fits in with cluster 0.
-
-Cluster 1 is "inner-city." 
-
-Cluster 2 is a young gentrifying neighborhood or university campus (suspect!). 
-
-Cluster 3 is Puerto Rico.
-
-Cluster 5 is older, whiter, poorer suburbs.
-
-#### Silhouette
-
-A silhouette coefficient is a measure of the ratio of the intra- to inter-cluster distances on the range -1 to 1. The silhouette plot displays this coefficient for each observation.
+For the sake of demonstration, if we follow the error metric and make 10 clusters, interpretability suffers because cluster each weighs mostly on one feature.
 
 <p align="center">
-  <img src="images/old/silo_KMeans6.png" width=500 height=450>
+  <img src="images/nmf/NMF10.png" width=850>
 </p>
-Although the accuracy of this plot is not a great look, it does tell us two interesting things:
 
-1. KMeans clustered Puerto Rico because it has some absolute values that are significantly different than the rest of the U.S. (household income, for example), but *not* because Puerto Rican tracts are similar. This gives more reason to exclude Puerto Rico completely unless we can account for geographical differences in cost of living.
+#### KMeans
 
-2. Cluster 1 and 2, which we think represent more urban areas, are small because their archetype is not well-defined by the features. Other clusters actually accomodate those tracts which do not fit the urban archetype as well.
+I found a KMeans clusterer to produce the most interpretable clusters.
+
+<p align="center">
+  <img src="images/kmeans/k=6.png" width=850>
+  <img src="images/cluster_proportions.png" width=850>
+</p>
+
+Cluster 0 - Suburban
+
+Cluster 1 - Urban early gentrification
+
+Cluster 2 - More rural with population loss
+
+Cluster 3 - High poverty and black population
+
+Cluster 4 - Student area
+
+Cluster 5 - Recently developed
+
+Clusters 4 and 5 are small and odd enough that their designations should be reviewed. Although students are poor, they are not the target of the OZ program. Cluster 5 has developed rapidly and may have been misdesignated based on 2011–15 estimates.
+
+Clusters 2 and 3 appear to be appropriate targets for the program, although gentrification could threaten their residents.
+
+Clusters 0 and 1 are the majority types and less interpretable. All the “suspicious” tracts I found in reporting on corruption in the designation process were part of these groups. For these we can use other statistical criteria such as relative poverty and educational attainment.
+
+#### Error metric
+
+This visualization of the clusters on a principal component plot shows the overlap of the clusters. Some points are closer to the centroids of other clusters.
+
+<p align="center">
+  <img src="images/pca_clusters.png" width=700 height=700>
+</p>
+
+The silhouette coefficient is a common measure of clustering error. It is the ratio of the intra- to inter-cluster distances on the range [-1, 1]. (-1 is worst, 1 is best.) The silhouette plot shows this coefficient for each observation.
+
+<p align="center">
+  <img src="images/kmeans/silok=6.png" width=500 height=450>
+</p>
+
+As with NMF, I found that the error metric did not tell me very much about the interpretability of the clusters. Even though the mean silhouette error for six clusters was not good, it did not decrease with > 6 clusters.
 
 ## Mapping the clusters
 
+Denver’s OZs colored by cluster. Most of the designations seem justified, although many of these areas were already developing. Note that specific tracts will not exactly reflect the cluster averages shown on the cluster plots in the previous section.
 
-## Next Steps
+<p align="center">
+  <img src="images/denver_map.png" width=800 height=640>
+</p>
 
-1. ***
+## Conclusions
 
-2. ***
+> **Raise the bar for designation**
+
+The criteria for Opportunity Zone designation should be made more stringent. I found two groups that do not seem to be appropriate targets for the OZ program: student neighborhoods and neighborhoods which had a rapid development between 2012 and 2017. 
+
+Improved criteria should take into account other demographic factors beyond just poverty and relative household income. This will reduce the risk of sacrificing government revenue on investments in areas that are already properous. Congress should take this issue seriously if they pretend to be budget-conscious.
+
+> **Require legislative approval**
+
+Locals, such as state governors, will be the best judges of the economic health of their neighborhoods and thus have the best knowledge to target OZ incentives. Nonetheless, we must ensure governors are acting in the public interest rather than giving favors. The OZ program should require that a governor's selections are ratified by the state legislature.
+
+> **Collect data on the program**
+
+Federal lawmakers have introduced two bills to require data collection and reporting on OZs (H.R. 5042 and S. 1344).<sup>[6](#footnote6)</sup> But wthout revising the designation criteria, the OZ program will appear to be a success because already prosperous areas were included. 
+
+Any data collection effort should also track who is moving in and out and demographic changes that demonstrate gentrification or the displacement of disadvantaged or minority communities. There is little evidence that place-based tax incentives actually benefit the original marginalized communities they are intended to target. Without evidence in data, we should not accept any claim of success.
 
 [Back to top](#content)
 
