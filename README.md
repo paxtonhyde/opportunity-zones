@@ -17,11 +17,11 @@ Paxton Hyde, March 2020
 
 The U.S. Tax Cuts and Jobs Act of 2017 introduced the Opportunity Zone (OZ) program to encourage investment in struggling communities. The program allows capital gains tax write-downs for investments in business or real estate in designated Census tracts. (A Census tract is a geographic subdivision of the country used for statistical purposes averaging about 4000 residents.) These tax benefits are provided to offset additional costs and risks associated with developing in neglected or weak markets. 
 
-News reporting on OZs tends to be skeptical of the program, because it appears to be a tax giveaway to wealthy investors who would have developed anyways.<sup>[1](#footnote1)</sup> For example, the *Economist* weekly notes that the Old Port neighborhood in downtown Portland, ME was designated as an OZ despite its success as a tourist destination.<sup>[2](#footnote2)</sup> This sort of evidence suggests that the designation criteria are too lax.
+News reporting on OZs tends to be skeptical of the program, because it appears to be a tax giveaway to wealthy investors who would have developed anyways.<sup>[1](#footnote1)</sup> For example, the *Economist* notes that the Old Port neighborhood in downtown Portland, ME was designated as an OZ despite its success as a tourist destination.<sup>[2](#footnote2)</sup> This evidence suggests that the designation criteria are too lax.
 
 Furthermore, research on similar place-based tax incentives shows that they have little if any effect on the economic well-being of an area's residence. The new jobs created usually either replace jobs that already existed or are taken by high-skilled workers who move in and gentrify the area.<sup>[3](#footnote3)</sup>
 
-President Trump has recently proclaimed the OZ program a success, even though it is under investigation by the Treasury Department.<sup>[4](#footnote4)</sup><sup>[,5](#footnote5)</sup> Congress also has not introduced regulation requiring data collection and reports on the effects of the program.<sup>[6](#footnote6)</sup>
+President Trump has recently proclaimed the OZ program a success, despite the fact that the Treasury Department has an open investigation into corruption in the designation process.<sup>[4](#footnote4)</sup><sup>[,5](#footnote5)</sup> Furthermore, Congress has failed to implement data collection and reporting on the program's effectiveness.<sup>[6](#footnote6)</sup>
 
 #### Opportunity Zone Designation Process
 <p align="center">
