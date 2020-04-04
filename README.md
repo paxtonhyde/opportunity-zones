@@ -1,4 +1,4 @@
-# Opportunity Zones: 
+# Identifying faults in Opportunity Zone designation
 <p align="center">
   <img src="images/houston_1.jpg" alt="source: New York Times" width=900>
 </p>
@@ -42,13 +42,13 @@ Note that governor's role is a double-edged sword. They play a crucial role beca
 
 Given the skeptical hypothesis that many OZs are misdesignated, the goals of this project are to:
 
-1. Collect Census data through the API
+1. Collect data through the Census API
 
 2. Compare designated OZs with tracts that were eligible but not picked
 
 3. Identify zones whose OZ status should be revoked with clustering, and
 
-4. Determine new designation criteria
+4. Make suggestions for a revised designation process
 
 ## Data
 
