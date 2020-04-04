@@ -1,8 +1,8 @@
-# What's in an Opportunity Zone?
+# Opportunity Zones: 
 <p align="center">
   <img src="images/houston_1.jpg" alt="source: New York Times" width=900>
 </p>
-Paxton Hyde
+Paxton Hyde, March 2020
 
 ## Content
 - [Background](#background)
@@ -25,7 +25,7 @@ President Trump has recently proclaimed the OZ program a success, even though it
 
 #### Opportunity Zone Designation Process
 <p align="center">
-      <img src="images/oz_designation.png">
+      <img src="images/oz_designation.png" width=700>
 </p>
 
 State Governors nominate Census Tracts in their state as OZs, and the Secretary of the Treasury approves these selections. A tract is eligible if:
@@ -76,7 +76,7 @@ Demographics are represented by:
 Note: I represented household income and home value as a percent change between 2012 and 2017 rather than an absolute value as to avoid comparison based on an area's cost of living. I did the same for population and number of housing units to represent changing demand in an area. To make the standardization effective, I capped the percent change features at 100% and removed the minimum value for the median building construction year.
 
 <p align="center">
-  <img src="images/collinearity.png" width = 450 height = 450>
+  <img src="images/collinearity.png" width = 600 height = 500>
 </p>
 
 The correlation matrix shows that homeownership is strongly correlated with more single unit housing, so I excluded that feature.
@@ -88,7 +88,7 @@ I did not want to exclude % white or black (other races serve as the third categ
 Comparing all tracts eligible for OZ benefits with designated OZs, there were few *z-*significant differences in my chosen features.
 
 <p align="center">
-  <img src="images/feature_comparison.png" width = 700 height = 450>
+  <img src="images/feature_comparison.png" width = 550 height = 450>
 </p>
 
 OZs have significantly less single unit housing and homeowners, suggesting that tend to be urban. This might be because governors were concentrating their development efforts in cities rather than rural areas with smaller markets. Otherwise, it might be because poverty is somewhat negatively correlated with single unit housing and homeownership (see above).
@@ -98,7 +98,7 @@ OZs also tend to have a greater minority population, which could be because *(a)
 A principal component plot shows no clear separation between the groups. (Each principal component represents a linear combination of all the features. This plot does not show all the variance, it is a simple visualization tool.)
 
 <p align="center">
-  <img src="images/pca_noseparation.png" width = 700 height = 700>
+  <img src="images/pca_noseparation.png" width = 700 height = 500>
 </p>
 
 The "suspicious" tracts that are marked here were identified in the news reporting I mentioned in the introduction. These include:
@@ -107,57 +107,23 @@ The "suspicious" tracts that are marked here were identified in the news reporti
 
 * the Warehouse District in NOLA, which is another gentrifying area
 
-* Market Square Park in Houston, which is the site of several new luxury developments
+* Market Square Park in Houston, which is the site of [several](https://www.hines.com/properties/the-preston-houston) [luxury](https://www.arismarketsquare.com/?utm_source=GoogleLocalListing&utm_medium=organic) [developments](https://www.marketsquaretower.com/?utm_source=GoogleLocalListing&utm_medium=organic)
 
-* Northwood Gardens in W. Palm Beach, home to Rybovich superyacht marina and nearby other much poorer neighborhoods which were undesignated, and
+* Water Street and Sparkman Wharf in Tampa Bay, the site of [a new luxury development](https://waterstreettampa.com/) owned by the owner of the Tampa Bay Lightning
+
+* Northwood Gardens in W. Palm Beach, home to Rybovich superyacht marina, and
 
 * College Park, MD, which is home to the University of Maryland
 
 ## Clustering
-
-#### NMF
-
-I hoped using non-negative matrix factorization (NMF) would show the appropriate number of clusters to explain variance within designated OZs. There was no clear "elbow" in the reconstruction error plot however.
-
-<p align="center">
-  <img src="images/old/nmf_error.png" width=400>
-</p>
-
-Instead, I decided to judge the success of my clustering algorithm on the interpretability of the clusters.
-
-These plots of the NMF components for each cluster (group, in other words) show how much each feature affects the likelihood of a particular observation (an OZ tract, in this case) being in a particular cluster.
-
-<p align="center">
-  <img src="images/nmf/NMF6.png" width=850>
-</p>
-
-I found six clusters to be fairly interpretable:
-
-Cluster 0 looks more like the U.S. average than a low-income community, given that it has higher weights of % white, household income, and age. Lightly suspicious.
-
-Cluster 1 looks like a developed urban area or university campus.
-
-Cluster 2 looks like a poorer, urban, black neighborhood archetype.
-
-Cluster 3 is almost too sparse to interpret, but could be a tract is recently developed.
-
-Cluster 4 looks like a university campus.
-
-Cluster 5 loads heavily on *not* being a *low-income community*, and has some other features that we would expect to accompany that type.
-
-For the sake of demonstration, if we follow the error metric and make 10 clusters, interpretability suffers because cluster each weighs mostly on one feature.
-
-<p align="center">
-  <img src="images/nmf/NMF10.png" width=850>
-</p>
 
 #### KMeans
 
 I found a KMeans clusterer to produce the most interpretable clusters.
 
 <p align="center">
-  <img src="images/kmeans/k=6.png" width=850>
-  <img src="images/cluster_proportions.png" width=850>
+  <img src="images/kmeans/k=6.png" width=700>
+  <img src="images/cluster_proportions.png" width=700>
 </p>
 
 Cluster 0 - Suburban
@@ -172,6 +138,8 @@ Cluster 4 - Student area
 
 Cluster 5 - Recently developed
 
+-----
+
 Clusters 4 and 5 are small and odd enough that their designations should be reviewed. Although students are poor, they are not the target of the OZ program. Cluster 5 has developed rapidly and may have been misdesignated based on 2011–15 estimates.
 
 Clusters 2 and 3 appear to be appropriate targets for the program, although gentrification could threaten their residents.
@@ -183,16 +151,16 @@ Clusters 0 and 1 are the majority types and less interpretable. All the “suspi
 This visualization of the clusters on a principal component plot shows the overlap of the clusters. Some points are closer to the centroids of other clusters.
 
 <p align="center">
-  <img src="images/pca_clusters.png" width=700 height=700>
+  <img src="images/pca_clusters.png" width = 700 height = 500>
 </p>
 
 The silhouette coefficient is a common measure of clustering error. It is the ratio of the intra- to inter-cluster distances on the range [-1, 1]. (-1 is worst, 1 is best.) The silhouette plot shows this coefficient for each observation.
 
 <p align="center">
-  <img src="images/kmeans/silok=6.png" width=500 height=450>
+  <img src="images/kmeans/silok=6.png" width=600 height=600>
 </p>
 
-As with NMF, I found that the error metric did not tell me very much about the interpretability of the clusters. Even though the mean silhouette error for six clusters was not good, it did not decrease with > 6 clusters.
+I found that the error metric did not tell me very much about the interpretability of the clusters. Even though the mean silhouette error for six clusters was not good, it did not decrease with > 6 clusters.
 
 ## Mapping the clusters
 
