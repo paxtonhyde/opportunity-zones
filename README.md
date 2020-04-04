@@ -76,7 +76,7 @@ Demographics are represented by:
 Note: I represented household income and home value as a percent change between 2012 and 2017 rather than an absolute value as to avoid comparison based on an area's cost of living. I did the same for population and number of housing units to represent changing demand in an area. To make the standardization effective, I capped the percent change features at 100% and removed the minimum value for the median building construction year.
 
 <p align="center">
-  <img src="images/collinearity.png" width = 600 height = 550>
+  <img src="images/collinearity.png" width = 600 height = 600>
 </p>
 
 The correlation matrix shows that homeownership is strongly correlated with more single unit housing, so I excluded that feature.
@@ -122,7 +122,7 @@ The "suspicious" tracts that are marked here were identified in the news reporti
 I found a KMeans clusterer to produce the most interpretable clusters.
 
 <p align="center">
-  <img src="images/kmeans/k=6.png" width=700>
+  <img src="images/kmeans/k=6.png" width=850>
   <img src="images/cluster_proportions.png" width=700>
 </p>
 
