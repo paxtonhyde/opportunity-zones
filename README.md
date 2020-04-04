@@ -36,7 +36,7 @@ State Governors nominate Census Tracts in their state as OZs, and the Secretary 
 
 Governors may nominate up to one-quarter of the LIC tracts in their state, or up to 25 if their state has less than 100 LICs. In addition, they may nominate a number of LIC-adjacent tracts up to five percent of the total tracts in the state. Designations may be based on data from 2011-2015 or more recent American Community Survey (ACS) 5-year estimates.<sup>[8](#footnote8)</sup> (Seeing as the ACS is released every year, the original designations were already based on outdated information.)
 
-Note that governors play a crucial role because they have local knowledge about which areas actually need the incentives. They can also exploit the process to grant favors.
+Note that governor's role is a double-edged sword. They play a crucial role because they have local knowledge about which areas actually need the incentives. At the same time, they can also exploit the process to grant favors to their connections.
 
 ## Objectives
 
@@ -76,7 +76,7 @@ Demographics are represented by:
 Note: I represented household income and home value as a percent change between 2012 and 2017 rather than an absolute value as to avoid comparison based on an area's cost of living. I did the same for population and number of housing units to represent changing demand in an area. To make the standardization effective, I capped the percent change features at 100% and removed the minimum value for the median building construction year.
 
 <p align="center">
-  <img src="images/collinearity.png" width = 600 height = 500>
+  <img src="images/collinearity.png" width = 600 height = 550>
 </p>
 
 The correlation matrix shows that homeownership is strongly correlated with more single unit housing, so I excluded that feature.
@@ -98,7 +98,7 @@ OZs also tend to have a greater minority population, which could be because *(a)
 A principal component plot shows no clear separation between the groups. (Each principal component represents a linear combination of all the features. This plot does not show all the variance, it is a simple visualization tool.)
 
 <p align="center">
-  <img src="images/pca_noseparation.png" width = 700 height = 500>
+  <img src="images/pca_noseparation.png" width = 800 height = 650>
 </p>
 
 The "suspicious" tracts that are marked here were identified in the news reporting I mentioned in the introduction. These include:
@@ -151,7 +151,7 @@ Clusters 0 and 1 are the majority types and less interpretable. All the “suspi
 This visualization of the clusters on a principal component plot shows the overlap of the clusters. Some points are closer to the centroids of other clusters.
 
 <p align="center">
-  <img src="images/pca_clusters.png" width = 700 height = 500>
+  <img src="images/pca_clusters.png" width = 800 height = 650>
 </p>
 
 The silhouette coefficient is a common measure of clustering error. It is the ratio of the intra- to inter-cluster distances on the range [-1, 1]. (-1 is worst, 1 is best.) The silhouette plot shows this coefficient for each observation.
